@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #faf9f6;
+    --foreground: #0f172a;
+    --surface: #ffffff;
+    --surface-elevated: #ffffff;
+    --border-subtle: rgba(15, 23, 42, 0.06);
+    --border-strong: rgba(15, 23, 42, 0.12);
+    --primary: #15803d;
+    --primary-hover: #166534;
+    --primary-tint: #f0fdf4;
+    --muted: #64748b;
+    --radius-outer: 1.75rem;
+    --radius-inner: 1.25rem;
+  }
+}
+
+@theme {
+  --color-canvas: #faf9f6;
+  --color-surface: #ffffff;
+  --color-emerald-deep: #15803d;
+  --color-emerald-dark: #166534;
+  --color-emerald-light: #f0fdf4;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
+}
+
+/* Tabular numbers for price alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Double-Bezel Architecture (Doppelrand) */
+.doppel-shell {
+  background-color: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 1.75rem;
+  padding: 0.375rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.doppel-shell:hover {
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.05);
+}
+
+.doppel-core {
+  background-color: #ffffff;
+  border-radius: 1.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+/* Floating Glass Header */
+.bg-glass-nav {
+  background: rgba(250, 249, 246, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+/* Custom Button-in-Button Style */
+.btn-primary-pill {
+  background-color: #0f172a;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  items-center: center;
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+
+.btn-primary-pill:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+}
+
+.btn-primary-pill:active {
+  transform: scale(0.98);
+}
+
+.btn-accent-pill {
+  background-color: #15803d;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  items-center: center;
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.2);
+}
+
+.btn-accent-pill:hover {
+  background-color: #166534;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(21, 128, 61, 0.28);
+}
+
+.btn-accent-pill:active {
+  transform: scale(0.98);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.12);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* Smooth motion timings */
+.transition-smooth {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 300ms;
+}

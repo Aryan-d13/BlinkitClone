@@ -1,0 +1,346 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  Product,
+  CartItem,
+  SelectedCustomization,
+  UserProfile,
+  Address,
+  Order,
+  PromoCode,
+  OrderStatus,
+} from '@/types';
+import { INITIAL_USER, SAVED_ADDRESSES, INITIAL_ORDERS, PROMO_CODES, PRODUCTS } from '@/data/mockData';
+
+interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'info' | 'error';
+}
+
+interface AppContextType {
+  user: UserProfile;
+  cart: CartItem[];
+  wishlist: string[];
+  addresses: Address[];
+  selectedAddress: Address;
+  orders: Order[];
+  appliedPromo: PromoCode | null;
+  isCartOpen: boolean;
+  toasts: Toast[];
+  
+  // Cart Actions
+  addToCart: (product: Product, customizations?: SelectedCustomization[], specialInstructions?: string) => void;
+  removeFromCart: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
+  clearCart: () => void;
+  setIsCartOpen: (open: boolean) => void;
+  
+  // Wishlist Actions
+  toggleWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
+  
+  // Address Actions
+  setSelectedAddress: (address: Address) => void;
+  addAddress: (address: Omit<Address, 'id'>) => void;
+  deleteAddress: (id: string) => void;
+  
+  // Order & Promo Actions
+  applyPromoCode: (code: string) => { success: boolean; message: string };
+  removePromoCode: () => void;
+  placeOrder: (deliverySlot: string, paymentMethodName: string, tipAmount: number) => Order;
+  
+  // Toast
+  showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
+  
+  // Financial Computations
+  cartSubtotal: number;
+  creditApplied: number;
+  promoDiscount: number;
+  deliveryFee: number;
+  tax: number;
+  totalAmountToPay: number;
+  totalCartItemCount: number;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>(['p_1', 'p_4']);
+  const [addresses, setAddresses] = useState<Address[]>(SAVED_ADDRESSES);
+  const [selectedAddress, setSelectedAddress] = useState<Address>(SAVED_ADDRESSES[0]);
+  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Load initial cart state from localStorage if available
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('green_bites_cart');
+      if (savedCart) setCart(JSON.parse(savedCart));
+      const savedWishlist = localStorage.getItem('green_bites_wishlist');
+      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+    } catch (e) {
+      console.error('Failed to parse state from localStorage', e);
+    }
+  }, []);
+
+  // Sync cart & wishlist to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('green_bites_cart', JSON.stringify(cart));
+      localStorage.setItem('green_bites_wishlist', JSON.stringify(wishlist));
+    } catch (e) {
+      console.error('Failed to save to localStorage', e);
+    }
+  }, [cart, wishlist]);
+
+  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3500);
+  };
+
+  const addToCart = (
+    product: Product,
+    customizations: SelectedCustomization[] = [],
+    specialInstructions: string = ''
+  ) => {
+    const customPriceAddon = customizations.reduce((acc, c) => acc + c.price, 0);
+    const unitPrice = product.price + customPriceAddon;
+
+    setCart((prevCart) => {
+      // Find matching item with exact same customizations
+      const customKey = customizations.map((c) => c.optionId).sort().join(',');
+      const existingIndex = prevCart.findIndex(
+        (item) =>
+          item.product.id === product.id &&
+          item.selectedCustomizations.map((c) => c.optionId).sort().join(',') === customKey
+      );
+
+      if (existingIndex > -1) {
+        const updated = [...prevCart];
+        const newQty = updated[existingIndex].quantity + 1;
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: newQty,
+          totalPrice: newQty * unitPrice,
+        };
+        return updated;
+      } else {
+        const newItem: CartItem = {
+          cartItemId: `ci_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          product,
+          quantity: 1,
+          selectedCustomizations: customizations,
+          unitPrice,
+          totalPrice: unitPrice,
+          specialInstructions,
+        };
+        return [...prevCart, newItem];
+      }
+    });
+
+    showToast(`Added ${product.name} to lunch cart!`, 'success');
+  };
+
+  const removeFromCart = (cartItemId: string) => {
+    setCart((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
+    showToast('Item removed from cart', 'info');
+  };
+
+  const updateQuantity = (cartItemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(cartItemId);
+      return;
+    }
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.cartItemId === cartItemId) {
+          return {
+            ...item,
+            quantity,
+            totalPrice: quantity * item.unitPrice,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    setAppliedPromo(null);
+  };
+
+  const toggleWishlist = (productId: string) => {
+    setWishlist((prev) => {
+      const exists = prev.includes(productId);
+      if (exists) {
+        showToast('Removed from wishlist', 'info');
+        return prev.filter((id) => id !== productId);
+      } else {
+        showToast('Saved to wishlist!', 'success');
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const isInWishlist = (productId: string) => wishlist.includes(productId);
+
+  const addAddress = (newAddr: Omit<Address, 'id'>) => {
+    const created: Address = {
+      ...newAddr,
+      id: `addr_${Date.now()}`,
+    };
+    setAddresses((prev) => [...prev, created]);
+    setSelectedAddress(created);
+    showToast('Delivery address added!', 'success');
+  };
+
+  const deleteAddress = (id: string) => {
+    setAddresses((prev) => prev.filter((a) => a.id !== id));
+    showToast('Address deleted', 'info');
+  };
+
+  const applyPromoCode = (code: string) => {
+    const found = PROMO_CODES.find((p) => p.code.toUpperCase() === code.trim().toUpperCase());
+    if (!found) {
+      return { success: false, message: 'Invalid or expired promo code.' };
+    }
+    if (cartSubtotal < found.minOrderValue) {
+      return {
+        success: false,
+        message: `Minimum order value of $${found.minOrderValue} required for ${found.code}.`,
+      };
+    }
+    setAppliedPromo(found);
+    showToast(`Promo code ${found.code} applied!`, 'success');
+    return { success: true, message: `Promo code ${found.code} applied successfully!` };
+  };
+
+  const removePromoCode = () => {
+    setAppliedPromo(null);
+    showToast('Promo code removed', 'info');
+  };
+
+  // Financial Calculations
+  const cartSubtotal = cart.reduce((acc, item) => acc + item.totalPrice, 0);
+
+  const totalCartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Credit Deduction Logic matching reference design:
+  // "Company lunch credit applies automatically - $150.00 credit per day"
+  const availableCredit = Math.max(0, user.dailyCreditLimit - user.creditUsedToday);
+  const creditApplied = Math.min(cartSubtotal, availableCredit);
+
+  let promoDiscount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.discountType === 'percentage') {
+      promoDiscount = (cartSubtotal * appliedPromo.discountValue) / 100;
+    } else {
+      promoDiscount = appliedPromo.discountValue;
+    }
+  }
+
+  // Delivery fee free over $30 or with corporate credit
+  const deliveryFee = cartSubtotal > 0 && cartSubtotal >= 30 ? 0.00 : cartSubtotal > 0 ? 4.99 : 0.00;
+  const taxableAmount = Math.max(0, cartSubtotal - promoDiscount);
+  const tax = cartSubtotal > 0 ? Number((taxableAmount * 0.08).toFixed(2)) : 0;
+
+  const totalAmountToPay = Math.max(
+    0,
+    Number((cartSubtotal - creditApplied - promoDiscount + deliveryFee + tax).toFixed(2))
+  );
+
+  const placeOrder = (deliverySlot: string, paymentMethodName: string, tipAmount: number): Order => {
+    const newOrder: Order = {
+      id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+      createdAt: new Date().toISOString(),
+      items: [...cart],
+      subtotal: cartSubtotal,
+      creditApplied,
+      tip: tipAmount,
+      deliveryFee,
+      tax,
+      discount: promoDiscount,
+      totalPaid: Number((totalAmountToPay + tipAmount).toFixed(2)),
+      status: 'placed',
+      address: selectedAddress,
+      paymentMethod: paymentMethodName,
+      deliverySlot,
+      estimatedDeliveryTime: '30-40 min',
+      trackingSteps: [
+        { title: 'Order Received', description: 'Confirmed by Green Bites kitchen', timestamp: 'Just now', completed: true, current: true },
+        { title: 'Kitchen Preparing', description: 'Fresh ingredients being assembled', timestamp: 'In progress', completed: false, current: false },
+        { title: 'Out for Delivery', description: 'Assigned to Green Bites delivery rider', timestamp: 'Pending', completed: false, current: false },
+        { title: 'Delivered', description: 'To your specified location', timestamp: 'Pending', completed: false, current: false },
+      ],
+      driverName: 'David Miller',
+      driverPhone: '+1 (555) 438-9901',
+      driverAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    };
+
+    setOrders((prev) => [newOrder, ...prev]);
+    // Update daily credit used
+    setUser((prev) => ({
+      ...prev,
+      creditUsedToday: prev.creditUsedToday + creditApplied,
+    }));
+    clearCart();
+    return newOrder;
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        user,
+        cart,
+        wishlist,
+        addresses,
+        selectedAddress,
+        orders,
+        appliedPromo,
+        isCartOpen,
+        toasts,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        setIsCartOpen,
+        toggleWishlist,
+        isInWishlist,
+        setSelectedAddress,
+        addAddress,
+        deleteAddress,
+        applyPromoCode,
+        removePromoCode,
+        placeOrder,
+        showToast,
+        cartSubtotal,
+        creditApplied,
+        promoDiscount,
+        deliveryFee,
+        tax,
+        totalAmountToPay,
+        totalCartItemCount,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};
