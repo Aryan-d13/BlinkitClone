@@ -88,15 +88,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, variant = 'ho
             <div className="flex-1 flex flex-col justify-between py-1 w-full space-y-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      product.dietType === 'veg' || product.dietType === 'vegan'
-                        ? 'bg-emerald-600'
-                        : 'bg-amber-700'
-                    }`}
-                  />
-                  <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-                    {product.dietType} • {product.calories} kcal
+                  <span className="text-[11px] font-mono text-emerald-700 uppercase font-bold tracking-wider">
+                    {product.categoryName} • Express Delivery
                   </span>
                 </div>
 
@@ -109,8 +102,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, variant = 'ho
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
-                  ${product.price.toFixed(2)}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                    ₹{product.price.toFixed(0)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-xs text-slate-400 line-through tabular-nums">
+                      ₹{product.originalPrice.toFixed(0)}
+                    </span>
+                  )}
                 </div>
 
                 {totalQtyInCart > 0 ? (
@@ -195,9 +195,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, variant = 'ho
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-extrabold text-slate-900 tabular-nums">
-              ${product.price.toFixed(2)}
-            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-extrabold text-slate-900 tabular-nums">
+                ₹{product.price.toFixed(0)}
+              </span>
+              {product.originalPrice && (
+                <span className="text-[10px] text-slate-400 line-through tabular-nums">
+                  ₹{product.originalPrice.toFixed(0)}
+                </span>
+              )}
+            </div>
 
             {totalQtyInCart > 0 ? (
               <div className="flex items-center gap-2 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
@@ -210,7 +217,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, variant = 'ho
                 <span className="font-extrabold text-slate-900 text-xs tabular-nums">{totalQtyInCart}</span>
                 <button
                   onClick={handleIncrement}
-                  className="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs"
+                  className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs"
                 >
                   <Plus className="w-3 h-3" />
                 </button>

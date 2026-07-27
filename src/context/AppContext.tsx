@@ -9,9 +9,8 @@ import {
   Address,
   Order,
   PromoCode,
-  OrderStatus,
 } from '@/types';
-import { INITIAL_USER, SAVED_ADDRESSES, INITIAL_ORDERS, PROMO_CODES, PRODUCTS } from '@/data/mockData';
+import { INITIAL_USER, SAVED_ADDRESSES, INITIAL_ORDERS, PROMO_CODES } from '@/data/mockData';
 
 interface Toast {
   id: string;
@@ -67,9 +66,9 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
+  const [user] = useState<UserProfile>(INITIAL_USER);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>(['p_1', 'p_4']);
+  const [wishlist, setWishlist] = useState<string[]>(['p_t1', 'p_st1']);
   const [addresses, setAddresses] = useState<Address[]>(SAVED_ADDRESSES);
   const [selectedAddress, setSelectedAddress] = useState<Address>(SAVED_ADDRESSES[0]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
@@ -80,9 +79,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Load initial cart state from localStorage if available
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem('green_bites_cart');
+      const savedCart = localStorage.getItem('dc_stores_cart');
       if (savedCart) setCart(JSON.parse(savedCart));
-      const savedWishlist = localStorage.getItem('green_bites_wishlist');
+      const savedWishlist = localStorage.getItem('dc_stores_wishlist');
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
     } catch (e) {
       console.error('Failed to parse state from localStorage', e);
@@ -92,8 +91,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Sync cart & wishlist to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('green_bites_cart', JSON.stringify(cart));
-      localStorage.setItem('green_bites_wishlist', JSON.stringify(wishlist));
+      localStorage.setItem('dc_stores_cart', JSON.stringify(cart));
+      localStorage.setItem('dc_stores_wishlist', JSON.stringify(wishlist));
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
@@ -116,7 +115,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const unitPrice = product.price + customPriceAddon;
 
     setCart((prevCart) => {
-      // Find matching item with exact same customizations
       const customKey = customizations.map((c) => c.optionId).sort().join(',');
       const existingIndex = prevCart.findIndex(
         (item) =>
@@ -147,12 +145,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    showToast(`Added ${product.name} to lunch cart!`, 'success');
+    showToast(`Added ${product.name} to shopping bag!`, 'success');
   };
 
   const removeFromCart = (cartItemId: string) => {
     setCart((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
-    showToast('Item removed from cart', 'info');
+    showToast('Item removed from bag', 'info');
   };
 
   const updateQuantity = (cartItemId: string, quantity: number) => {
@@ -217,7 +215,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (cartSubtotal < found.minOrderValue) {
       return {
         success: false,
-        message: `Minimum order value of $${found.minOrderValue} required for ${found.code}.`,
+        message: `Minimum order value of ₹${found.minOrderValue} required for ${found.code}.`,
       };
     }
     setAppliedPromo(found);
@@ -232,13 +230,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // Financial Calculations
   const cartSubtotal = cart.reduce((acc, item) => acc + item.totalPrice, 0);
-
   const totalCartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-  // Credit Deduction Logic matching reference design:
-  // "Company lunch credit applies automatically - $150.00 credit per day"
-  const availableCredit = Math.max(0, user.dailyCreditLimit - user.creditUsedToday);
-  const creditApplied = Math.min(cartSubtotal, availableCredit);
+  const creditApplied = 0; // Corporate credit removed
 
   let promoDiscount = 0;
   if (appliedPromo) {
@@ -249,23 +242,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  // Delivery fee free over $30 or with corporate credit
-  const deliveryFee = cartSubtotal > 0 && cartSubtotal >= 30 ? 0.00 : cartSubtotal > 0 ? 4.99 : 0.00;
+  // Delivery fee: free over ₹499 in Shajapur
+  const deliveryFee = cartSubtotal > 0 && cartSubtotal >= 499 ? 0 : cartSubtotal > 0 ? 30 : 0;
   const taxableAmount = Math.max(0, cartSubtotal - promoDiscount);
-  const tax = cartSubtotal > 0 ? Number((taxableAmount * 0.08).toFixed(2)) : 0;
+  const tax = cartSubtotal > 0 ? Number((taxableAmount * 0.05).toFixed(2)) : 0;
 
   const totalAmountToPay = Math.max(
     0,
-    Number((cartSubtotal - creditApplied - promoDiscount + deliveryFee + tax).toFixed(2))
+    Number((cartSubtotal - promoDiscount + deliveryFee + tax).toFixed(2))
   );
 
   const placeOrder = (deliverySlot: string, paymentMethodName: string, tipAmount: number): Order => {
     const newOrder: Order = {
-      id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+      id: `ORD-DC${Math.floor(10000 + Math.random() * 90000)}`,
       createdAt: new Date().toISOString(),
       items: [...cart],
       subtotal: cartSubtotal,
-      creditApplied,
       tip: tipAmount,
       deliveryFee,
       tax,
@@ -275,24 +267,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       address: selectedAddress,
       paymentMethod: paymentMethodName,
       deliverySlot,
-      estimatedDeliveryTime: '30-40 min',
+      estimatedDeliveryTime: '30-45 min',
       trackingSteps: [
-        { title: 'Order Received', description: 'Confirmed by Green Bites kitchen', timestamp: 'Just now', completed: true, current: true },
-        { title: 'Kitchen Preparing', description: 'Fresh ingredients being assembled', timestamp: 'In progress', completed: false, current: false },
-        { title: 'Out for Delivery', description: 'Assigned to Green Bites delivery rider', timestamp: 'Pending', completed: false, current: false },
-        { title: 'Delivered', description: 'To your specified location', timestamp: 'Pending', completed: false, current: false },
+        { title: 'Order Received', description: 'Confirmed by DC Stores Shajapur', timestamp: 'Just now', completed: true, current: true },
+        { title: 'Items Packing', description: 'Carefully wrapped with gift packaging', timestamp: 'In progress', completed: false, current: false },
+        { title: 'Out for Delivery', description: 'Dispatched with local Shajapur courier', timestamp: 'Pending', completed: false, current: false },
+        { title: 'Delivered', description: 'To your specified Shajapur address', timestamp: 'Pending', completed: false, current: false },
       ],
-      driverName: 'David Miller',
-      driverPhone: '+1 (555) 438-9901',
+      driverName: 'Vikram Singh',
+      driverPhone: '+91 94250 99887',
       driverAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
     };
 
     setOrders((prev) => [newOrder, ...prev]);
-    // Update daily credit used
-    setUser((prev) => ({
-      ...prev,
-      creditUsedToday: prev.creditUsedToday + creditApplied,
-    }));
     clearCart();
     return newOrder;
   };

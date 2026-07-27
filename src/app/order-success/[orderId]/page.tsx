@@ -5,14 +5,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import { SITE_CONTENT } from '@/config/siteContent';
 import {
   CheckCircle2,
   Clock,
   MapPin,
   Phone,
-  UtensilsCrossed,
   ArrowRight,
   Sparkles,
+  Gift,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -22,7 +23,7 @@ export default function OrderSuccessPage() {
   const { orders } = useApp();
 
   const order = orders.find((o) => o.id === orderId) || orders[0];
-  const [secondsRemaining, setSecondsRemaining] = useState(1800);
+  const [secondsRemaining, setSecondsRemaining] = useState(2400);
 
   useEffect(() => {
     confetti({
@@ -47,23 +48,23 @@ export default function OrderSuccessPage() {
       {/* Top Banner */}
       <div className="doppel-shell p-2">
         <div className="doppel-core p-8 bg-slate-900 text-white text-center space-y-4 relative overflow-hidden">
-          <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md text-emerald-400 flex items-center justify-center mx-auto border border-white/20">
+          <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md text-amber-400 flex items-center justify-center mx-auto border border-white/20">
             <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-mono font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" /> Order #{order.id} Confirmed
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Your Lunch is Being Prepared!</h1>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{SITE_CONTENT.orderSuccess.headline}</h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
-            Green Bites kitchen is assembling your order with fresh organic ingredients.
+            {SITE_CONTENT.orderSuccess.subtitle}
           </p>
 
           <div className="pt-2 inline-flex items-center gap-3 bg-slate-950/60 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10">
-            <Clock className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-400 font-mono uppercase block">Estimated Arrival</span>
+              <span className="text-[10px] text-slate-400 font-mono uppercase block">{SITE_CONTENT.orderSuccess.arrivalLabel}</span>
               <span className="text-lg font-black font-mono tracking-wider tabular-nums">
                 {minutes}:{seconds < 10 ? `0${seconds}` : seconds} mins
               </span>
@@ -75,7 +76,7 @@ export default function OrderSuccessPage() {
       {/* Tracking Stepper */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-6">
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400 block flex items-center gap-2">
-          <UtensilsCrossed className="w-4 h-4 text-emerald-700" /> Kitchen & Courier Stepper
+          <Gift className="w-4 h-4 text-emerald-700" /> {SITE_CONTENT.orderSuccess.stepperEyebrow}
         </span>
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -112,9 +113,9 @@ export default function OrderSuccessPage() {
               />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase text-slate-400">Rider Partner</span>
+              <span className="text-[10px] font-mono uppercase text-slate-400">{SITE_CONTENT.orderSuccess.riderTitle}</span>
               <h4 className="font-bold text-sm text-slate-900">{order.driverName}</h4>
-              <span className="text-xs text-emerald-700 font-semibold">Green Bites Express</span>
+              <span className="text-xs text-emerald-700 font-semibold">{SITE_CONTENT.orderSuccess.riderSub}</span>
             </div>
           </div>
 
@@ -131,9 +132,9 @@ export default function OrderSuccessPage() {
             <MapPin className="w-5 h-5 text-emerald-700" />
           </div>
           <div className="text-xs">
-            <span className="text-[10px] font-mono uppercase text-slate-400">Delivering To</span>
+            <span className="text-[10px] font-mono uppercase text-slate-400">{SITE_CONTENT.orderSuccess.deliveringTo}</span>
             <h4 className="font-bold text-slate-900">{order.address.label} - {order.address.name}</h4>
-            <p className="text-slate-500 line-clamp-1">{order.address.street}</p>
+            <p className="text-slate-500 line-clamp-1">{order.address.street}, {order.address.city}</p>
           </div>
         </div>
       </div>
@@ -141,7 +142,7 @@ export default function OrderSuccessPage() {
       {/* Itemized Receipt */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="font-extrabold text-slate-900 text-sm">Itemized Order Receipt</h3>
+          <h3 className="font-extrabold text-slate-900 text-sm">{SITE_CONTENT.orderSuccess.receiptTitle}</h3>
           <span className="text-xs text-slate-400">Payment: {order.paymentMethod}</span>
         </div>
 
@@ -152,39 +153,27 @@ export default function OrderSuccessPage() {
                 <span className="font-bold text-emerald-700 w-5 tabular-nums">{item.quantity}x</span>
                 <div>
                   <span className="font-bold text-slate-900">{item.product.name}</span>
-                  {item.selectedCustomizations.length > 0 && (
-                    <p className="text-[11px] text-slate-400">
-                      {item.selectedCustomizations.map((c) => c.optionName).join(', ')}
-                    </p>
-                  )}
                 </div>
               </div>
-              <span className="font-bold text-slate-900 tabular-nums">${item.totalPrice.toFixed(2)}</span>
+              <span className="font-bold text-slate-900 tabular-nums">₹{item.totalPrice.toFixed(0)}</span>
             </div>
           ))}
         </div>
 
         <div className="pt-3 border-t border-slate-200 space-y-1.5 text-xs text-slate-600">
           <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span className="font-bold text-slate-900 tabular-nums">${order.subtotal.toFixed(2)}</span>
+            <span>{SITE_CONTENT.orderSuccess.subtotalLabel}</span>
+            <span className="font-bold text-slate-900 tabular-nums">₹{order.subtotal.toFixed(0)}</span>
           </div>
 
-          {order.creditApplied > 0 && (
-            <div className="flex justify-between font-bold text-emerald-700">
-              <span>NovaTech Corporate Credit</span>
-              <span className="tabular-nums">-${order.creditApplied.toFixed(2)}</span>
-            </div>
-          )}
-
           <div className="flex justify-between">
-            <span>Taxes & Delivery</span>
-            <span className="tabular-nums">${(order.tax + order.deliveryFee).toFixed(2)}</span>
+            <span>{SITE_CONTENT.orderSuccess.taxDeliveryLabel}</span>
+            <span className="tabular-nums">₹{(order.tax + order.deliveryFee).toFixed(0)}</span>
           </div>
 
           <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm font-black text-slate-900">
-            <span>Total Paid</span>
-            <span className="text-lg text-emerald-700 tabular-nums">${order.totalPaid.toFixed(2)}</span>
+            <span>{SITE_CONTENT.orderSuccess.totalPaidLabel}</span>
+            <span className="text-lg text-emerald-700 tabular-nums">₹{order.totalPaid.toFixed(0)}</span>
           </div>
         </div>
       </div>
@@ -195,11 +184,11 @@ export default function OrderSuccessPage() {
           href="/"
           className="px-6 py-3 rounded-full bg-slate-100 text-slate-800 font-bold text-xs hover:bg-slate-200 transition-colors"
         >
-          Return to Home Page
+          {SITE_CONTENT.orderSuccess.homeBtn}
         </Link>
 
         <Link href="/orders" className="btn-accent-pill text-xs px-6 py-3">
-          <span>View All Past Orders</span>
+          <span>{SITE_CONTENT.orderSuccess.ordersBtn}</span>
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

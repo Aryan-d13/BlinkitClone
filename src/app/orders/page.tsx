@@ -15,14 +15,14 @@ export default function OrdersPage() {
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-emerald-700 flex items-center gap-1.5">
           <History className="w-4 h-4" /> Activity History
         </span>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Corporate Lunch Receipts</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">DC Stores Order History</h1>
       </div>
 
       {orders.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/70 space-y-3">
           <p className="text-slate-500 font-bold text-sm">No previous order records found.</p>
           <Link href="/products" className="btn-accent-pill text-xs">
-            Browse Menu
+            Browse Store
           </Link>
         </div>
       ) : (
@@ -53,7 +53,7 @@ export default function OrdersPage() {
                     <span className="font-medium">
                       {item.quantity}x {item.product.name}
                     </span>
-                    <span className="font-bold text-slate-900 tabular-nums">${item.totalPrice.toFixed(2)}</span>
+                    <span className="font-bold text-slate-900 tabular-nums">₹{item.totalPrice.toFixed(0)}</span>
                   </div>
                 ))}
               </div>
@@ -61,12 +61,7 @@ export default function OrdersPage() {
               <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
                 <div>
                   <span className="text-slate-400 font-mono text-[11px]">Total Paid: </span>
-                  <strong className="text-slate-900 text-sm tabular-nums">${ord.totalPaid.toFixed(2)}</strong>
-                  {ord.creditApplied > 0 && (
-                    <span className="text-emerald-700 font-bold ml-2">
-                      (${ord.creditApplied.toFixed(2)} Credit Covered)
-                    </span>
-                  )}
+                  <strong className="text-slate-900 text-sm tabular-nums">₹{ord.totalPaid.toFixed(0)}</strong>
                 </div>
 
                 <div className="flex items-center gap-3">

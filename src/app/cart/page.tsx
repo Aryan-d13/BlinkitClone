@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import { SITE_CONTENT } from '@/config/siteContent';
 import {
   ShoppingBag,
   Plus,
@@ -24,19 +25,17 @@ export default function CartPage() {
     updateQuantity,
     removeFromCart,
     cartSubtotal,
-    creditApplied,
     promoDiscount,
     deliveryFee,
     tax,
     totalAmountToPay,
     totalCartItemCount,
-    user,
     appliedPromo,
     applyPromoCode,
     removePromoCode,
   } = useApp();
 
-  const [tip, setTip] = useState(10);
+  const [tip, setTip] = useState(20);
   const [promoInput, setPromoInput] = useState('');
   const [promoError, setPromoError] = useState('');
 
@@ -58,15 +57,15 @@ export default function CartPage() {
       <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-4 gap-4">
         <div>
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-emerald-700 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4" /> Corporate Order Review
+            <Sparkles className="w-4 h-4" /> DC Stores Express Review
           </span>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Review Your Lunch</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Review Your Bag</h1>
         </div>
         <Link
           href="/products"
           className="px-4 py-2 rounded-full bg-slate-100 text-slate-800 font-bold text-xs hover:bg-slate-200 transition-colors"
         >
-          + Add Items
+          + Add More Items
         </Link>
       </div>
 
@@ -75,12 +74,12 @@ export default function CartPage() {
           <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
             <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800">Your lunch bag is empty</h2>
+          <h2 className="text-xl font-bold text-slate-800">Your shopping bag is empty</h2>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            You still have <strong className="text-emerald-700 font-mono">${user.dailyCreditLimit.toFixed(2)}</strong> daily lunch credit available today!
+            Explore our collection of aesthetic tumblers, leather journals, books, and gift hampers.
           </p>
           <Link href="/products" className="btn-accent-pill text-xs">
-            Browse Menu
+            Browse Catalog
           </Link>
         </div>
       ) : (
@@ -90,7 +89,7 @@ export default function CartPage() {
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-4">
               <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400 block border-b border-slate-100 pb-3">
-                Selected Lunch Items ({totalCartItemCount})
+                Selected Store Items ({totalCartItemCount})
               </span>
 
               <div className="space-y-4">
@@ -108,14 +107,9 @@ export default function CartPage() {
                         <div className="flex items-start justify-between gap-2">
                           <h3 className="text-base font-bold text-slate-900">{item.product.name}</h3>
                           <span className="text-base font-extrabold text-slate-900 tabular-nums">
-                            ${item.totalPrice.toFixed(2)}
+                            ₹{item.totalPrice.toFixed(0)}
                           </span>
                         </div>
-                        {item.selectedCustomizations.length > 0 && (
-                          <p className="text-xs text-slate-400 font-medium mt-0.5">
-                            {item.selectedCustomizations.map((c) => c.optionName).join(', ')}
-                          </p>
-                        )}
                       </div>
 
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/60">
@@ -153,12 +147,12 @@ export default function CartPage() {
               <div className="flex items-center gap-2">
                 <HeartHandshake className="w-4 h-4 text-emerald-700" />
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400">
-                  Rider Gratuity
+                  Delivery Rider Tip
                 </span>
               </div>
-              <p className="text-xs text-slate-500">100% of tips go directly to your delivery partner.</p>
+              <p className="text-xs text-slate-500">100% of tips go directly to your Shajapur express delivery partner.</p>
               <div className="grid grid-cols-4 gap-2 text-xs font-bold">
-                {[0, 5, 10, 15].map((amt) => (
+                {[0, 10, 20, 50].map((amt) => (
                   <button
                     key={amt}
                     onClick={() => setTip(amt)}
@@ -168,7 +162,7 @@ export default function CartPage() {
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    {amt === 0 ? 'No Tip' : `$${amt}`}
+                    {amt === 0 ? 'No Tip' : `₹${amt}`}
                   </button>
                 ))}
               </div>
@@ -201,7 +195,7 @@ export default function CartPage() {
                   <form onSubmit={handleApplyPromo} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Promo Code"
+                      placeholder="Promo Code (e.g. SHAJAPUR10)"
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value)}
                       className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
@@ -217,59 +211,52 @@ export default function CartPage() {
               {/* Financial Breakdown Table */}
               <div className="space-y-2 text-xs text-slate-600">
                 <div className="flex justify-between font-medium">
-                  <span>Meal Subtotal</span>
-                  <span className="font-bold text-slate-900 tabular-nums">${cartSubtotal.toFixed(2)}</span>
+                  <span>Bag Subtotal</span>
+                  <span className="font-bold text-slate-900 tabular-nums">₹{cartSubtotal.toFixed(0)}</span>
                 </div>
-
-                {creditApplied > 0 && (
-                  <div className="flex justify-between font-bold text-emerald-700">
-                    <span>NovaTech Corporate Credit</span>
-                    <span className="tabular-nums">-${creditApplied.toFixed(2)}</span>
-                  </div>
-                )}
 
                 {promoDiscount > 0 && (
                   <div className="flex justify-between font-medium text-emerald-700">
                     <span>Promo Discount</span>
-                    <span className="tabular-nums">-${promoDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">-₹{promoDiscount.toFixed(0)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between font-medium">
-                  <span>Delivery Fee</span>
+                  <span>Shajapur Delivery Fee</span>
                   <span className="text-emerald-700 font-bold">
-                    {deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`}
+                    {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(0)}`}
                   </span>
                 </div>
 
                 <div className="flex justify-between font-medium">
-                  <span>Estimated Tax</span>
-                  <span className="tabular-nums">${tax.toFixed(2)}</span>
+                  <span>GST Tax</span>
+                  <span className="tabular-nums">₹{tax.toFixed(0)}</span>
                 </div>
 
                 {tip > 0 && (
                   <div className="flex justify-between font-medium text-slate-700">
                     <span>Rider Tip</span>
-                    <span className="tabular-nums">${tip.toFixed(2)}</span>
+                    <span className="tabular-nums">₹{tip.toFixed(0)}</span>
                   </div>
                 )}
 
                 <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-base font-black text-slate-900">
-                  <span>You Pay</span>
-                  <span className="text-xl text-emerald-700 tabular-nums">${finalPayWithTip.toFixed(2)}</span>
+                  <span>Total Payable</span>
+                  <span className="text-xl text-emerald-700 tabular-nums">₹{finalPayWithTip.toFixed(0)}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium">
                 <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-                <span>Only excess charges are billed to your personal card.</span>
+                <span>Fast 30-45 Mins Delivery across Shajapur, MP.</span>
               </div>
 
               <button
                 onClick={() => router.push('/checkout')}
                 className="w-full py-4 rounded-2xl bg-slate-900 text-white font-extrabold text-xs shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <span>Proceed to Checkout</span>
+                <span>{SITE_CONTENT.cart.proceedToCheckoutBtn}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

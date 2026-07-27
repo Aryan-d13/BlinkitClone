@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { PAYMENT_OPTIONS } from '@/data/mockData';
+import { SITE_CONTENT } from '@/config/siteContent';
 import {
   MapPin,
   Clock,
@@ -11,7 +12,6 @@ import {
   Smartphone,
   Building2,
   Wallet,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
@@ -26,7 +26,6 @@ export default function CheckoutPage() {
     selectedAddress,
     setSelectedAddress,
     cartSubtotal,
-    creditApplied,
     promoDiscount,
     deliveryFee,
     tax,
@@ -35,8 +34,8 @@ export default function CheckoutPage() {
   } = useApp();
 
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>(PAYMENT_OPTIONS[0].id);
-  const [deliverySlot, setDeliverySlot] = useState<string>('12:30 PM - 1:00 PM');
-  const [upiVpa, setUpiVpa] = useState<string>('arif@okaxis');
+  const [deliverySlot, setDeliverySlot] = useState<string>('30-45 Mins Express');
+  const [upiVpa, setUpiVpa] = useState<string>('rahul@upi');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (cart.length === 0) {
@@ -47,7 +46,7 @@ export default function CheckoutPage() {
           onClick={() => router.push('/products')}
           className="btn-accent-pill text-xs"
         >
-          Browse Menu
+          Browse Store
         </button>
       </div>
     );
@@ -64,7 +63,7 @@ export default function CheckoutPage() {
     });
 
     setTimeout(() => {
-      const order = placeOrder(deliverySlot, selectedPaymentObj.name, 10);
+      const order = placeOrder(deliverySlot, selectedPaymentObj.name, 20);
       router.push(`/order-success/${order.id}`);
     }, 800);
   };
@@ -75,9 +74,9 @@ export default function CheckoutPage() {
       {/* Page Title */}
       <div className="border-b border-slate-200 pb-4">
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-emerald-700 flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4" /> Secure Order Finalization
+          <ShieldCheck className="w-4 h-4" /> {SITE_CONTENT.checkout.eyebrow}
         </span>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Checkout & Payment</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{SITE_CONTENT.checkout.title}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -88,7 +87,7 @@ export default function CheckoutPage() {
           {/* Step 1: Address */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-4">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400 block flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-700" /> 1. Select Delivery Destination
+              <MapPin className="w-4 h-4 text-emerald-700" /> {SITE_CONTENT.checkout.step1Title}
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -111,7 +110,7 @@ export default function CheckoutPage() {
                     </div>
                     <p className="text-xs font-bold">{addr.name}</p>
                     <p className={`text-[11px] line-clamp-2 mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                      {addr.street}
+                      {addr.street}, {addr.city}
                     </p>
                   </button>
                 );
@@ -122,14 +121,14 @@ export default function CheckoutPage() {
           {/* Step 2: Time Slot */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-4">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400 block flex items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-700" /> 2. Delivery Time Window
+              <Clock className="w-4 h-4 text-emerald-700" /> {SITE_CONTENT.checkout.step2Title}
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               {[
-                { slot: '12:30 PM - 1:00 PM', title: 'Standard Lunch', desc: 'Recommended Cut-off' },
-                { slot: '1:00 PM - 1:30 PM', title: 'Late Lunch', desc: 'Warm Hold Insulated' },
-                { slot: '15-20 Min Express', title: 'Express Delivery', desc: 'Priority Courier' },
+                { slot: '30-45 Mins Express', title: 'Standard Express', desc: 'Shajapur Town Delivery' },
+                { slot: 'Scheduled Evening (5-7 PM)', title: 'Scheduled Evening', desc: 'Gift Wrap Handover' },
+                { slot: 'Express Priority (15-30 Min)', title: 'Priority Dispatch', desc: 'Direct Courier' },
               ].map((item) => (
                 <button
                   key={item.slot}
@@ -156,7 +155,7 @@ export default function CheckoutPage() {
           {/* Step 3: Payment Options */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs space-y-4">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400 block flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-emerald-700" /> 3. Payment Method Simulation
+              <CreditCard className="w-4 h-4 text-emerald-700" /> {SITE_CONTENT.checkout.step3Title}
             </span>
 
             <div className="space-y-2.5">
@@ -175,11 +174,10 @@ export default function CheckoutPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                        {pay.type === 'card' && <CreditCard className="w-4.5 h-4.5" />}
-                        {pay.type === 'credit' && <Sparkles className="w-4.5 h-4.5 text-emerald-700" />}
                         {pay.type === 'upi' && <Smartphone className="w-4.5 h-4.5 text-blue-600" />}
-                        {pay.type === 'netbanking' && <Building2 className="w-4.5 h-4.5 text-purple-600" />}
-                        {pay.type === 'wallet' && <Wallet className="w-4.5 h-4.5 text-amber-600" />}
+                        {pay.type === 'cod' && <Wallet className="w-4.5 h-4.5 text-emerald-600" />}
+                        {pay.type === 'card' && <CreditCard className="w-4.5 h-4.5 text-purple-600" />}
+                        {pay.type === 'netbanking' && <Building2 className="w-4.5 h-4.5 text-amber-600" />}
                       </div>
 
                       <div>
@@ -203,7 +201,7 @@ export default function CheckoutPage() {
 
             {selectedPaymentObj.type === 'upi' && (
               <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 text-xs space-y-2">
-                <label className="font-bold text-slate-800 block">Enter your UPI VPA Handle</label>
+                <label className="font-bold text-slate-800 block">{SITE_CONTENT.checkout.upiLabel}</label>
                 <input
                   type="text"
                   value={upiVpa}
@@ -227,30 +225,30 @@ export default function CheckoutPage() {
             <div className="space-y-2 text-xs text-slate-600">
               <div className="flex justify-between font-medium">
                 <span>Subtotal ({cart.length} items)</span>
-                <span className="font-bold text-slate-900 tabular-nums">${cartSubtotal.toFixed(2)}</span>
+                <span className="font-bold text-slate-900 tabular-nums">₹{cartSubtotal.toFixed(0)}</span>
               </div>
 
-              {creditApplied > 0 && (
-                <div className="flex justify-between font-bold text-emerald-700">
-                  <span>NovaTech Corporate Allowance</span>
-                  <span className="tabular-nums">-${creditApplied.toFixed(2)}</span>
+              {promoDiscount > 0 && (
+                <div className="flex justify-between font-medium text-emerald-700">
+                  <span>Promo Discount</span>
+                  <span className="tabular-nums">-₹{promoDiscount.toFixed(0)}</span>
                 </div>
               )}
 
               <div className="flex justify-between font-medium">
-                <span>Taxes & Delivery</span>
-                <span className="tabular-nums">${(tax + deliveryFee).toFixed(2)}</span>
+                <span>GST Taxes & Delivery</span>
+                <span className="tabular-nums">₹{(tax + deliveryFee).toFixed(0)}</span>
               </div>
 
               <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-base font-black text-slate-900">
-                <span>Total Due Now</span>
-                <span className="text-xl text-emerald-700 tabular-nums">${totalAmountToPay.toFixed(2)}</span>
+                <span>Total Due</span>
+                <span className="text-xl text-emerald-700 tabular-nums">₹{totalAmountToPay.toFixed(0)}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-              <span>Simulated transaction. No real credit card charge occurs.</span>
+              <span>{SITE_CONTENT.checkout.simNotice}</span>
             </div>
 
             <button
@@ -258,7 +256,7 @@ export default function CheckoutPage() {
               disabled={isSubmitting}
               className="w-full py-4 rounded-2xl bg-slate-900 text-white font-extrabold text-xs shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>{isSubmitting ? 'Processing Order...' : 'Place Lunch Order'}</span>
+              <span>{isSubmitting ? SITE_CONTENT.checkout.submittingBtn : SITE_CONTENT.checkout.submitBtn}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

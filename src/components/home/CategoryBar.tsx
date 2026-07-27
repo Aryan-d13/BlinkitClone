@@ -14,35 +14,35 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
   activeCategory,
   onSelectCategory,
 }) => {
-  const circularCategories = CATEGORIES.slice(0, 7);
-
   const pillFilters = [
-    { id: 'cat_meals', name: 'All Meals' },
-    { id: 'cat_bowls', name: 'Bowls' },
-    { id: 'cat_salads', name: 'Salads' },
-    { id: 'cat_beverages', name: 'Beverages' },
+    { id: 'cat_all', name: 'All Products' },
+    { id: 'cat_tumblers', name: 'Tumblers' },
+    { id: 'cat_stationery', name: 'Stationery' },
+    { id: 'cat_books', name: 'Books' },
+    { id: 'cat_gifts', name: 'Gifts' },
+    { id: 'cat_snacks', name: 'Drinks & Treats' },
   ];
 
   return (
     <div className="space-y-6 mb-10">
       
-      {/* Top Category Squircle Bar */}
+      {/* Top Category Cards Bar */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-slate-400">
             {SITE_CONTENT.homePage.categoriesEyebrow}
           </span>
           <button
-            onClick={() => onSelectCategory('cat_meals')}
+            onClick={() => onSelectCategory('cat_all')}
             className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
           >
             {SITE_CONTENT.homePage.showAllCategories} ({CATEGORIES.length})
           </button>
         </div>
 
-        {/* Horizontal Category Cards */}
+        {/* Horizontal Department Buttons */}
         <div className="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
-          {circularCategories.map((cat) => {
+          {CATEGORIES.map((cat) => {
             const isSelected = activeCategory === cat.id;
             return (
               <button
@@ -69,7 +69,7 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Quick Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200/60 pb-3 custom-scrollbar">
         {pillFilters.map((pill) => {
           const isActive = activeCategory === pill.id;
@@ -79,7 +79,7 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
               onClick={() => onSelectCategory(pill.id)}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 ${
                 isActive
-                  ? 'bg-emerald-700 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/70'
               }`}
             >

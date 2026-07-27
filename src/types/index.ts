@@ -17,11 +17,12 @@ export interface CustomizationGroup {
 }
 
 export interface NutritionInfo {
-  calories: number;
-  protein: string;
-  carbs: string;
-  fat: string;
-  fiber?: string;
+  calories?: number;
+  protein?: string;
+  carbs?: string;
+  fat?: string;
+  material?: string;
+  capacity?: string;
 }
 
 export interface Review {
@@ -99,7 +100,7 @@ export interface Address {
   deliveryNotes?: string;
 }
 
-export type PaymentType = 'card' | 'upi' | 'netbanking' | 'wallet' | 'credit';
+export type PaymentType = 'card' | 'upi' | 'netbanking' | 'wallet' | 'cod';
 
 export interface PaymentOption {
   id: string;
@@ -116,8 +117,6 @@ export interface UserProfile {
   email: string;
   phone: string;
   companyName: string;
-  dailyCreditLimit: number;
-  creditUsedToday: number;
   avatar: string;
   role: string;
 }
@@ -137,7 +136,6 @@ export interface Order {
   createdAt: string;
   items: CartItem[];
   subtotal: number;
-  creditApplied: number;
   tip: number;
   deliveryFee: number;
   tax: number;
