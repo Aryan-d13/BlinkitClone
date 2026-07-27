@@ -2,15 +2,17 @@
 
 @layer base {
   :root {
-    --background: #faf9f6;
-    --foreground: #0f172a;
+    --background: #faf8f5;
+    --foreground: #0f1219;
     --surface: #ffffff;
     --surface-elevated: #ffffff;
-    --border-subtle: rgba(15, 23, 42, 0.06);
-    --border-strong: rgba(15, 23, 42, 0.12);
-    --primary: #15803d;
-    --primary-hover: #166534;
-    --primary-tint: #f0fdf4;
+    --border-subtle: rgba(212, 175, 55, 0.12);
+    --border-strong: rgba(212, 175, 55, 0.25);
+    --primary: #d4af37;
+    --primary-hover: #b8860b;
+    --primary-tint: #fffdf5;
+    --gold-accent: #c5a059;
+    --gold-light: #f4e8c1;
     --muted: #64748b;
     --radius-outer: 1.75rem;
     --radius-inner: 1.25rem;
@@ -18,11 +20,11 @@
 }
 
 @theme {
-  --color-canvas: #faf9f6;
+  --color-canvas: #faf8f5;
   --color-surface: #ffffff;
-  --color-emerald-deep: #15803d;
-  --color-emerald-dark: #166534;
-  --color-emerald-light: #f0fdf4;
+  --color-gold-deep: #b8860b;
+  --color-gold-main: #d4af37;
+  --color-gold-light: #f4e8c1;
 }
 
 body {
@@ -40,78 +42,83 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Double-Bezel Architecture (Doppelrand) */
+/* Double-Bezel Architecture (Doppelrand with Luxury Gold Accent) */
 .doppel-shell {
-  background-color: rgba(15, 23, 42, 0.02);
-  border: 1px solid rgba(15, 23, 42, 0.05);
+  background-color: rgba(15, 18, 25, 0.02);
+  border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 1.75rem;
   padding: 0.375rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .doppel-shell:hover {
-  border-color: rgba(15, 23, 42, 0.1);
-  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.05);
+  border-color: rgba(212, 175, 55, 0.35);
+  box-shadow: 0 12px 32px -8px rgba(15, 18, 25, 0.06);
 }
 
 .doppel-core {
   background-color: #ffffff;
   border-radius: 1.375rem;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(15, 18, 25, 0.03);
 }
 
 /* Floating Glass Header */
 .bg-glass-nav {
-  background: rgba(250, 249, 246, 0.82);
+  background: rgba(250, 248, 245, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
-/* Custom Button-in-Button Style */
+/* Custom Button-in-Button Style - Obsidian Dark */
 .btn-primary-pill {
-  background-color: #0f172a;
-  color: #ffffff;
+  background-color: #0f1219;
+  color: #f4e8c1;
   border-radius: 9999px;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
   font-size: 0.8125rem;
   display: inline-flex;
-  items-center: center;
+  align-items: center;
   gap: 0.5rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 14px rgba(15, 18, 25, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .btn-primary-pill:hover {
-  background-color: #1e293b;
+  background-color: #1a202c;
+  color: #ffffff;
+  border-color: rgba(212, 175, 55, 0.5);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 6px 20px rgba(15, 18, 25, 0.22);
 }
 
 .btn-primary-pill:active {
   transform: scale(0.98);
 }
 
+/* Metallic Champagne Gold Button */
 .btn-accent-pill {
-  background-color: #15803d;
-  color: #ffffff;
+  background: linear-gradient(135deg, #e5c158 0%, #d4af37 50%, #b8860b 100%);
+  color: #0f1219;
   border-radius: 9999px;
   padding: 0.625rem 1.25rem;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.8125rem;
   display: inline-flex;
-  items-center: center;
+  align-items: center;
   gap: 0.5rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.2);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .btn-accent-pill:hover {
-  background-color: #166534;
+  background: linear-gradient(135deg, #ebd17a 0%, #dfba43 50%, #c59415 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(21, 128, 61, 0.28);
+  box-shadow: 0 6px 22px rgba(212, 175, 55, 0.48);
 }
 
 .btn-accent-pill:active {
@@ -129,12 +136,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.12);
+  background: rgba(212, 175, 55, 0.25);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(15, 23, 42, 0.25);
+  background: rgba(212, 175, 55, 0.45);
 }
 
 /* Smooth motion timings */

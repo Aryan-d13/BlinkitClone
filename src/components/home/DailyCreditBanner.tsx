@@ -13,18 +13,26 @@ export const DailyCreditBanner: React.FC = () => {
         
         {/* Top Header Row */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
-          <div className="flex items-center gap-2.5">
-            <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> {SITE_CONTENT.brand.location}
-            </span>
-            <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-              Aesthetic Lifestyle & Gift Store
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-xs border border-[#d4af37]/40 bg-[#0F1219] shrink-0">
+              <Image
+                src="/images/dc-stores-logo.png"
+                alt="DC Stores Logo"
+                fill
+                className="object-contain p-0.5"
+              />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 leading-none">DC STORES</h4>
+              <span className="text-[10px] font-bold text-[#b8860b] mt-0.5 block">
+                A Product by Anuradha Mehta Enterprises
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200/50">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-            <span>30-45 Mins Express Delivery Active</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4e8c1]/60 text-slate-900 text-xs font-bold border border-[#d4af37]/40">
+            <ShieldCheck className="w-4 h-4 text-[#b8860b] shrink-0" />
+            <span>30-45 Mins Express Delivery in Shajapur</span>
           </div>
         </div>
 
@@ -33,8 +41,8 @@ export const DailyCreditBanner: React.FC = () => {
           
           {/* Left Column: Store Value Proposition */}
           <div className="md:col-span-7 space-y-4">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-semibold text-amber-700 block">
-              {SITE_CONTENT.homePage.eyebrowTag}
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold text-[#b8860b] block flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" /> {SITE_CONTENT.homePage.eyebrowTag}
             </span>
 
             <div className="space-y-2">
@@ -66,7 +74,7 @@ export const DailyCreditBanner: React.FC = () => {
 
           {/* Right Column: Hero Product Showcase */}
           <div className="md:col-span-5 flex justify-center">
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-3xl p-2 bg-slate-100/80 border border-slate-200/60 shadow-xl overflow-hidden">
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-3xl p-2 bg-slate-100/80 border border-[#d4af37]/30 shadow-xl overflow-hidden">
               <div className="relative w-full h-full rounded-2xl overflow-hidden">
                 <Image
                   src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=600"
@@ -83,8 +91,8 @@ export const DailyCreditBanner: React.FC = () => {
         {/* Bottom Delivery Info Strip */}
         <div className="pt-6 border-t border-slate-100 grid grid-cols-2 gap-4 text-xs">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-              <Clock className="w-4 h-4 text-amber-700" />
+            <div className="w-8 h-8 rounded-xl bg-[#0F1219] text-[#f4e8c1] flex items-center justify-center shrink-0 border border-[#d4af37]/30">
+              <Clock className="w-4 h-4 text-[#d4af37]" />
             </div>
             <div>
               <span className="text-[10px] font-mono uppercase text-slate-400 block">{SITE_CONTENT.homePage.cutoffLabel}</span>
@@ -93,8 +101,8 @@ export const DailyCreditBanner: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-              <Truck className="w-4 h-4 text-emerald-700" />
+            <div className="w-8 h-8 rounded-xl bg-[#0F1219] text-[#f4e8c1] flex items-center justify-center shrink-0 border border-[#d4af37]/30">
+              <Truck className="w-4 h-4 text-[#d4af37]" />
             </div>
             <div>
               <span className="text-[10px] font-mono uppercase text-slate-400 block">Free Shipping</span>

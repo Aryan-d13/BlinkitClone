@@ -34,11 +34,11 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-40 bg-glass-nav transition-all">
       
       {/* Top Announcement Bar */}
-      <div className="bg-slate-900 text-slate-300 py-1.5 px-4 text-xs">
+      <div className="bg-[#0F1219] text-slate-300 py-1.5 px-4 text-xs border-b border-[#d4af37]/20">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-semibold tracking-wide uppercase flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> {SITE_CONTENT.navigation.announcementBadge}
+            <span className="px-2 py-0.5 rounded-full bg-[#d4af37]/20 text-[#f4e8c1] text-[10px] font-bold tracking-wide uppercase flex items-center gap-1 border border-[#d4af37]/30">
+              <Sparkles className="w-3 h-3 text-[#d4af37]" /> {SITE_CONTENT.navigation.announcementBadge}
             </span>
             <span className="text-slate-300 truncate">
               {SITE_CONTENT.navigation.announcementSuffix}
@@ -47,10 +47,10 @@ export const Navbar: React.FC = () => {
 
           <div className="hidden sm:flex items-center gap-4 text-slate-400 text-[11px]">
             <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-400" /> {SITE_CONTENT.brand.cutoffTime}
+              <Clock className="w-3.5 h-3.5 text-[#d4af37]" /> {SITE_CONTENT.brand.cutoffTime}
             </span>
             <span className="text-slate-700">|</span>
-            <span>Location: {SITE_CONTENT.brand.location}</span>
+            <span className="text-[#f4e8c1]">Location: {SITE_CONTENT.brand.location}</span>
           </div>
         </div>
       </div>
@@ -61,16 +61,24 @@ export const Navbar: React.FC = () => {
           
           {/* Logo + Delivery Location */}
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-black text-sm tracking-widest shadow-md group-hover:scale-105 transition-transform duration-300 border border-slate-700">
-                DC
+            <Link href="/" className="flex items-center gap-3.5 group">
+              <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-300 border border-[#d4af37]/40 bg-[#0F1219] shrink-0">
+                <Image
+                  src="/images/dc-stores-logo.png"
+                  alt="DC Stores Logo"
+                  fill
+                  className="object-contain p-0.5"
+                  priority
+                />
               </div>
               <div>
-                <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
-                  {SITE_CONTENT.brand.brandFirst} <span className="text-amber-600">{SITE_CONTENT.brand.brandSecond}</span>
-                </h1>
-                <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase block mt-0.5">
-                  {SITE_CONTENT.brand.tagline}
+                <div className="flex items-baseline gap-1.5">
+                  <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">
+                    DC <span className="text-[#b8860b]">STORES</span>
+                  </h1>
+                </div>
+                <span className="text-[10px] font-bold text-[#b8860b] tracking-wide uppercase block mt-0.5">
+                  {SITE_CONTENT.brand.subline}
                 </span>
               </div>
             </Link>
@@ -79,9 +87,9 @@ export const Navbar: React.FC = () => {
             <div className="hidden lg:relative lg:block">
               <button
                 onClick={() => setIsAddressMenuOpen(!isAddressMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 hover:bg-slate-100 border border-slate-200/60 transition-colors text-left"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-100 border border-slate-200/80 transition-colors text-left"
               >
-                <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#b8860b] shrink-0" />
                 <div className="text-xs max-w-[160px] truncate">
                   <div className="font-semibold text-slate-800 flex items-center gap-1">
                     <span>{selectedAddress.label} - {selectedAddress.city}</span>
@@ -109,11 +117,11 @@ export const Navbar: React.FC = () => {
                           : 'hover:bg-slate-50'
                       }`}
                     >
-                      <MapPin className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#b8860b] mt-0.5 shrink-0" />
                       <div className="flex-1 text-xs">
                         <div className="font-semibold text-slate-800 flex items-center justify-between">
                           <span>{addr.label}</span>
-                          {selectedAddress.id === addr.id && <CheckCircle className="w-3.5 h-3.5 text-amber-600" />}
+                          {selectedAddress.id === addr.id && <CheckCircle className="w-3.5 h-3.5 text-[#b8860b]" />}
                         </div>
                         <p className="text-slate-400 text-[11px] truncate">{addr.street}</p>
                       </div>
@@ -123,7 +131,7 @@ export const Navbar: React.FC = () => {
                     <Link
                       href="/addresses"
                       onClick={() => setIsAddressMenuOpen(false)}
-                      className="text-xs font-semibold text-amber-700 hover:text-amber-800"
+                      className="text-xs font-semibold text-[#b8860b] hover:text-amber-800"
                     >
                       {SITE_CONTENT.navigation.manageAddressesLink}
                     </Link>
@@ -142,7 +150,7 @@ export const Navbar: React.FC = () => {
                 placeholder={SITE_CONTENT.navigation.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 text-xs rounded-full bg-slate-100/80 border border-slate-200/80 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition-all"
+                className="w-full pl-9 pr-8 py-2 text-xs rounded-full bg-slate-100/80 border border-slate-200/80 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:bg-white transition-all"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200">
                 /
@@ -172,7 +180,7 @@ export const Navbar: React.FC = () => {
             >
               <Heart className="w-4.5 h-4.5 stroke-[2]" />
               {wishlist.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-amber-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-[#b8860b] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {wishlist.length}
                 </span>
               )}
@@ -180,7 +188,7 @@ export const Navbar: React.FC = () => {
 
             {/* User Profile */}
             <Link href="/profile" className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100/80 transition-colors">
-              <div className="relative w-7 h-7 rounded-full overflow-hidden border border-slate-200">
+              <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#d4af37]/50">
                 <Image src={user.avatar} alt={user.name} fill className="object-cover" />
               </div>
             </Link>
@@ -195,7 +203,7 @@ export const Navbar: React.FC = () => {
                 {totalCartItemCount === 0 ? 'Bag' : `₹${cartSubtotal.toFixed(0)}`}
               </span>
               {totalCartItemCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-white/20 text-white text-[10px] font-extrabold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-slate-900 text-white text-[10px] font-extrabold flex items-center justify-center">
                   {totalCartItemCount}
                 </span>
               )}
