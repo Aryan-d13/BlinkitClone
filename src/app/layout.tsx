@@ -5,10 +5,11 @@ import { Navbar } from "@/components/layout/Navbar";
 import { CartDrawer } from "@/components/layout/CartDrawer";
 import { ToastContainer } from "@/components/layout/ToastContainer";
 import { Footer } from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export const metadata: Metadata = {
-  title: "Green Bites | Fresh Corporate Lunch & Grocery Delivery",
-  description: "Blinkit-inspired daily lunch & fresh grocery delivery with corporate allowance auto-deduction.",
+  title: "DC Stores | Aesthetic Tumblers, Stationery, Books & Gifts (Shajapur, MP)",
+  description: "A Product by Anuradha Mehta Enterprises. Shop aesthetic tumblers, leather journals, books, and gift hampers with 30-45 mins express delivery in Shajapur.",
 };
 
 export default function RootLayout({
@@ -18,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#F8FAF9] text-slate-900 selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#faf8f5] text-slate-900 selection:bg-[#d4af37] selection:text-[#0F1219] pb-20 md:pb-0">
         <AppProvider>
           <Navbar />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
@@ -27,8 +28,9 @@ export default function RootLayout({
           <Footer />
           <CartDrawer />
           <ToastContainer />
+          <MobileBottomNav />
         </AppProvider>
       </body>
     </html>
   );
-};
+}

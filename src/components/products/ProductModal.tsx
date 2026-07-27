@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Product, SelectedCustomization } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { X, Plus, Minus, Check, Star, Flame, Clock } from 'lucide-react';
+import { SITE_CONTENT } from '@/config/siteContent';
+import { X, Plus, Minus, Check, Star, Sparkles, Clock } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface ProductModalProps {
@@ -46,23 +47,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-y-auto">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-md transition-opacity"
           />
 
-          {/* Raycast / Linear Style Command Card */}
+          {/* Modal / Mobile Slide-up Sheet */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl z-10 overflow-hidden my-auto border border-slate-200/80"
+            className="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl z-10 overflow-hidden my-0 sm:my-auto border border-slate-200/80 max-h-[92vh] flex flex-col"
           >
             {/* Close Button */}
             <button
@@ -73,7 +74,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             </button>
 
             {/* Header Dish Image */}
-            <div className="relative w-full h-52 sm:h-56 bg-slate-100">
+            <div className="relative w-full h-48 sm:h-56 bg-slate-100 shrink-0">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -83,38 +84,38 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
               <div className="absolute bottom-4 left-5 right-5 text-white">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="bg-emerald-700 text-white text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold">
+                  <span className="bg-[#b8860b] text-white text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold">
                     {product.categoryName}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-amber-300 font-semibold">
                     <Star className="w-3.5 h-3.5 fill-amber-300" /> {product.rating} ({product.reviewCount}+ reviews)
                   </span>
                 </div>
-                <h3 className="text-2xl font-black">{product.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-black">{product.name}</h3>
               </div>
             </div>
 
             {/* Content Body */}
-            <div className="p-6 max-h-[55vh] overflow-y-auto space-y-6 custom-scrollbar">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-5 custom-scrollbar flex-1">
               
-              {/* Macros & Info Chips */}
-              <div className="grid grid-cols-3 gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs">
+              {/* Specs & Info Chips */}
+              <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs">
                 <div>
-                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Calories</span>
+                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Rating</span>
                   <span className="font-bold text-slate-800 flex items-center justify-center gap-1 mt-0.5">
-                    <Flame className="w-3.5 h-3.5 text-amber-500" /> {product.calories} kcal
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> {product.rating}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Prep Time</span>
+                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Delivery</span>
                   <span className="font-bold text-slate-800 flex items-center justify-center gap-1 mt-0.5">
                     <Clock className="w-3.5 h-3.5 text-emerald-700" /> {product.prepTime}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Diet</span>
-                  <span className="font-bold text-slate-800 capitalize mt-0.5 block">
-                    {product.dietType}
+                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Quality</span>
+                  <span className="font-bold text-slate-800 flex items-center justify-center gap-1 mt-0.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Premium
                   </span>
                 </div>
               </div>
@@ -122,7 +123,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               {/* Description */}
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 block mb-1">
-                  About Dish
+                  About Item
                 </span>
                 <p className="text-xs text-slate-600 leading-relaxed">{product.description}</p>
               </div>
@@ -159,7 +160,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                                 <div
                                   className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
                                     isSelected
-                                      ? 'bg-emerald-500 border-emerald-500 text-slate-950'
+                                      ? 'bg-amber-500 border-amber-500 text-slate-950'
                                       : 'border-slate-300 bg-white'
                                   }`}
                                 >
@@ -168,7 +169,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                                 <span>{opt.name}</span>
                               </div>
                               <span className="font-semibold tabular-nums">
-                                {opt.price === 0 ? 'Free' : `+$${opt.price.toFixed(2)}`}
+                                {opt.price === 0 ? 'Free' : `+₹${opt.price.toFixed(0)}`}
                               </span>
                             </button>
                           );
@@ -182,11 +183,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               {/* Special Instructions Input */}
               <div className="space-y-1.5">
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 block">
-                  Kitchen Notes (Optional)
+                  Gift Notes (Optional)
                 </span>
                 <input
                   type="text"
-                  placeholder="e.g. Dressing on the side..."
+                  placeholder="e.g. Include birthday card greeting..."
                   value={specialInstructions}
                   onChange={(e) => setSpecialInstructions(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-900 text-slate-800"
@@ -196,8 +197,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             </div>
 
             {/* Modal Action Bar */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-full border border-slate-200">
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-3 bg-white px-3 py-2 rounded-full border border-slate-200">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="text-slate-500 hover:text-slate-900 font-bold"
@@ -215,10 +216,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
 
               <button
                 onClick={handleAddToCart}
-                className="btn-accent-pill text-xs px-6 py-3 flex-1 justify-between shadow-md"
+                className="btn-accent-pill text-xs px-5 py-3 flex-1 justify-between shadow-md"
               >
-                <span>Add to Lunch</span>
-                <span className="tabular-nums">${totalPrice.toFixed(2)}</span>
+                <span>{SITE_CONTENT.productModal.addBtn}</span>
+                <span className="tabular-nums font-mono">₹{totalPrice.toFixed(0)}</span>
               </button>
             </div>
           </motion.div>
