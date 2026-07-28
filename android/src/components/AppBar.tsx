@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
 import { colors, spacing, typography, radii, shadows } from '../theme/tokens';
 
 interface AppBarProps {
@@ -8,6 +8,8 @@ interface AppBarProps {
   rightAction?: ReactNode;
   subtitle?: string;
 }
+
+const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0;
 
 export const AppBar: React.FC<AppBarProps> = ({
   title,
@@ -53,7 +55,7 @@ export const AppBar: React.FC<AppBarProps> = ({
 
         {/* Right */}
         <View style={styles.rightContainer}>
-          {rightAction || <View style={{ width: 48 }} />}
+          {rightAction || <View style={{ width: 44 }} />}
         </View>
       </View>
     </View>
@@ -63,7 +65,7 @@ export const AppBar: React.FC<AppBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.obsidian,
-    paddingTop: Platform.OS === 'android' ? spacing.xs : 0,
+    paddingTop: STATUS_BAR_HEIGHT + spacing.xs,
     paddingBottom: spacing.md,
     paddingHorizontal: spacing.base,
     borderBottomWidth: 1,
@@ -72,7 +74,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 48,
+    minHeight: 44,
   },
   backButton: {
     width: 40,

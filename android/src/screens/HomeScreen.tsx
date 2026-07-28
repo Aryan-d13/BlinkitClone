@@ -119,7 +119,7 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
             <SectionHeader title="Popular" count={filteredProducts.length} />
           </View>
         }
-        ListFooterComponent={<View style={{ height: spacing['2xl'] }} />}
+        ListFooterComponent={<View style={{ height: totalCartItemCount > 0 ? 100 : 40 }} />}
       />
 
       {/* Floating Cart Bar */}

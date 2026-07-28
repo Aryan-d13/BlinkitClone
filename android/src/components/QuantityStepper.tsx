@@ -21,7 +21,7 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
       <TouchableOpacity
         onPress={onDecrement}
         style={[styles.btn, isMd ? styles.btnMd : styles.btnSm]}
-        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
       >
         <Text style={[styles.btnText, isMd ? styles.btnTextMd : styles.btnTextSm]}>−</Text>
       </TouchableOpacity>
@@ -31,7 +31,7 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
       <TouchableOpacity
         onPress={onIncrement}
         style={[styles.btn, isMd ? styles.btnMd : styles.btnSm]}
-        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
       >
         <Text style={[styles.btnText, isMd ? styles.btnTextMd : styles.btnTextSm]}>+</Text>
       </TouchableOpacity>
@@ -54,9 +54,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   containerSm: {
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
     paddingVertical: 2,
-    gap: spacing.xs,
+    gap: 4,
   },
   btn: {
     alignItems: 'center',
@@ -70,29 +70,31 @@ const styles = StyleSheet.create({
     minHeight: minTouchTarget - 12,
   },
   btnSm: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
   },
   btnText: {
     color: colors.goldSoft,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   btnTextMd: {
     fontSize: 18,
   },
   btnTextSm: {
-    fontSize: 15,
+    fontSize: 14,
   },
   count: {
     color: colors.textOnDark,
     fontWeight: '900',
     textAlign: 'center',
-    minWidth: 20,
   },
   countMd: {
     ...typography.bodyBold,
+    minWidth: 20,
   },
   countSm: {
     ...typography.smallBold,
+    minWidth: 14,
+    fontSize: 12,
   },
 });

@@ -2,9 +2,8 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
-import { PriceTag } from './PriceTag';
 import { QuantityStepper } from './QuantityStepper';
-import { colors, spacing, radii, typography, shadows, minTouchTarget } from '../theme/tokens';
+import { colors, spacing, radii, typography, shadows } from '../theme/tokens';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_GAP = spacing.md;
@@ -36,13 +35,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
     }
   };
 
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPct = hasDiscount
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
+
   return (
     <TouchableOpacity
       activeOpacity={0.92}
       onPress={onPress}
       style={styles.card}
     >
-      {/* Image */}
+      {/* Image Container */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.image} />
 
@@ -71,9 +75,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           {product.name}
         </Text>
 
-        {/* Footer: Price + Action */}
+        {/* Footer: Price column on left, Action/Stepper on right */}
         <View style={styles.footer}>
-          <PriceTag price={product.price} originalPrice={product.originalPrice} size="sm" />
+          <View style={styles.priceCol}>
+            <Text style={styles.priceText}>₹{product.price.toFixed(0)}</Text>
+            {hasDiscount && (
+              <View style={styles.discountRow}>
+                <Text style={styles.originalPriceText}>₹{product.originalPrice!.toFixed(0)}</Text>
+                <Text style={styles.discountBadge}>{discountPct}% off</Text>
+              </View>
+            )}
+          </View>
 
           {qtyInCart > 0 ? (
             <QuantityStepper
@@ -110,7 +122,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 140,
+    height: 135,
     backgroundColor: colors.surfaceMuted,
   },
   image: {
@@ -168,28 +180,57 @@ const styles = StyleSheet.create({
     color: colors.goldDeep,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: spacing.xs,
+    marginBottom: 2,
+    fontSize: 9.5,
   },
   name: {
     ...typography.bodyBold,
     color: colors.textPrimary,
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: spacing.md,
-    minHeight: 36,
+    fontSize: 12.5,
+    lineHeight: 17,
+    marginBottom: spacing.sm,
+    minHeight: 34,
   },
   footer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
     marginTop: 'auto',
+    gap: 4,
+  },
+  priceCol: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  priceText: {
+    color: colors.textPrimary,
+    fontWeight: '900',
+    fontSize: 14,
+    fontVariant: ['tabular-nums'],
+  },
+  discountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 1,
+  },
+  originalPriceText: {
+    color: colors.textMuted,
+    fontSize: 10,
+    textDecorationLine: 'line-through',
+    fontVariant: ['tabular-nums'],
+  },
+  discountBadge: {
+    color: colors.goldDeep,
+    fontSize: 8.5,
+    fontWeight: '800',
   },
   addBtn: {
     backgroundColor: colors.obsidian,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 6,
     borderRadius: radii.full,
-    minHeight: 34,
+    minHeight: 32,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -198,6 +239,6 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: colors.goldSoft,
     fontWeight: '800',
-    fontSize: 12,
+    fontSize: 11.5,
   },
 });
