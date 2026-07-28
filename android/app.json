@@ -6,18 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "kotlinVersion": "2.0.20",
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35
-          }
-        }
-      ]
-    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dcstores.shajapur"
