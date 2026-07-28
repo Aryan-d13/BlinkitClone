@@ -1,123 +1,115 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
 import { CATEGORIES } from '../data/mockData';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
+import { colors, spacing, radii, typography, shadows } from '../theme/tokens';
+
+const SCREEN_W = Dimensions.get('window').width;
 
 export const CategoriesScreen: React.FC<any> = ({ navigation }) => {
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Departments Catalog" />
+    <ScreenWrapper>
+      <AppBar />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        <DoppelCard variant="dark" style={{ marginBottom: 16 }}>
-          <Text style={styles.headerTag}>DC STORES • SHAJAPUR DEPARTMENTS</Text>
-          <Text style={styles.headerTitle}>Browse Lifestyle Categories</Text>
-          <Text style={styles.headerSub}>Curated Tumblers, Leather Journals, Books, & Gift Hampers.</Text>
-        </DoppelCard>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.pageTitle}>Shop by Department</Text>
+        <Text style={styles.pageSubtitle}>
+          Curated categories for Shajapur's finest aesthetic products
+        </Text>
 
-        <View style={styles.grid}>
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              activeOpacity={0.9}
-              style={styles.cardContainer}
-              onPress={() => navigation.navigate('Products', { catId: cat.id })}
-            >
-              <Image source={{ uri: cat.image }} style={styles.cardImage} />
-              <View style={styles.cardOverlay}>
-                <View style={styles.itemBadge}>
-                  <Text style={styles.itemBadgeText}>{cat.itemCount} Items</Text>
-                </View>
-                <Text style={styles.catName}>{cat.name}</Text>
-                <Text style={styles.catDesc} numberOfLines={1}>{cat.description}</Text>
+        {CATEGORIES.map((cat, idx) => (
+          <TouchableOpacity
+            key={cat.id}
+            activeOpacity={0.9}
+            style={styles.card}
+            onPress={() => navigation.navigate('Products', { catId: cat.id })}
+          >
+            <Image source={{ uri: cat.image }} style={styles.cardImage} />
+            <View style={styles.cardGradient} />
+            <View style={styles.cardContent}>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{cat.itemCount} items</Text>
               </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+              <Text style={styles.cardTitle}>{cat.name}</Text>
+              {cat.description && (
+                <Text style={styles.cardDesc} numberOfLines={1}>{cat.description}</Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        ))}
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: spacing['2xl'] }} />
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
   scroll: {
     flex: 1,
-    padding: 16,
   },
-  headerTag: {
-    color: '#D4AF37',
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginBottom: 4,
+  scrollContent: {
+    padding: spacing.base,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#FFFFFF',
+  pageTitle: {
+    ...typography.headline,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
-  headerSub: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 2,
+  pageSubtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
   },
-  grid: {
-    gap: 14,
-  },
-  cardContainer: {
-    height: 150,
-    borderRadius: 22,
+  card: {
+    height: 160,
+    borderRadius: radii.xl,
     overflow: 'hidden',
-    backgroundColor: '#0F1219',
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    marginBottom: spacing.base,
+    backgroundColor: colors.obsidian,
+    ...shadows.medium,
   },
   cardImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.65,
-  },
-  cardOverlay: {
     position: 'absolute',
-    bottom: 14,
-    left: 14,
-    right: 14,
   },
-  itemBadge: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 18, 25, 0.55)',
+  },
+  cardContent: {
+    position: 'absolute',
+    bottom: spacing.lg,
+    left: spacing.lg,
+    right: spacing.lg,
+  },
+  countBadge: {
+    backgroundColor: colors.gold,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.sm,
     alignSelf: 'flex-start',
-    marginBottom: 6,
+    marginBottom: spacing.sm,
   },
-  itemBadgeText: {
-    color: '#0F1219',
-    fontSize: 9,
+  countBadgeText: {
+    ...typography.captionBold,
+    color: colors.obsidian,
+    fontSize: 10,
+  },
+  cardTitle: {
+    ...typography.title,
+    color: colors.textOnDark,
     fontWeight: '900',
   },
-  catName: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 18,
-  },
-  catDesc: {
-    color: '#CBD5E1',
-    fontSize: 11,
-    marginTop: 2,
+  cardDesc: {
+    ...typography.small,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: spacing.xs,
   },
 });

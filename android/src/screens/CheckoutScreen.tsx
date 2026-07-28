@@ -1,218 +1,319 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
 import { useApp } from '../context/AppContext';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
-import { GoldButton } from '../components/GoldButton';
+import { colors, spacing, radii, typography, shadows, minTouchTarget } from '../theme/tokens';
+
+const SLOTS = [
+  { id: 'express', label: '30-45 Mins', sub: 'Express Delivery', icon: '⚡' },
+  { id: 'evening', label: '6 PM - 8 PM', sub: 'Evening Slot', icon: '🌆' },
+  { id: 'tomorrow', label: '9 AM - 11 AM', sub: 'Tomorrow Morning', icon: '🌅' },
+];
+
+const PAYMENT_METHODS = [
+  { id: 'upi', label: 'UPI (PhonePe / GPay)', icon: '📱' },
+  { id: 'cod', label: 'Cash on Delivery', icon: '💵' },
+  { id: 'card', label: 'Credit / Debit Card', icon: '💳' },
+];
+
+const TIP_OPTIONS = [0, 20, 30, 50];
 
 export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
-  const { selectedAddress, placeOrder, totalAmountToPay } = useApp();
-  const [selectedSlot, setSelectedSlot] = useState('30-45 Mins Express Delivery');
-  const [paymentMethod, setPaymentMethod] = useState('Instant UPI (PhonePe / GPay / Paytm)');
+  const { selectedAddress, placeOrder, totalAmountToPay, totalCartItemCount } = useApp();
+  const [selectedSlot, setSelectedSlot] = useState('express');
+  const [paymentMethod, setPaymentMethod] = useState('upi');
   const [tip, setTip] = useState(20);
 
   const handlePlaceOrder = () => {
-    const createdOrder = placeOrder(selectedSlot, paymentMethod, tip);
-    navigation.replace('OrderSuccess', { orderId: createdOrder.id });
+    const slotLabel = SLOTS.find((s) => s.id === selectedSlot)?.label || '';
+    const pmLabel = PAYMENT_METHODS.find((p) => p.id === paymentMethod)?.label || '';
+    const order = placeOrder(slotLabel, pmLabel, tip);
+    navigation.replace('OrderSuccess', { orderId: order.id });
   };
 
+  const finalAmount = totalAmountToPay + tip;
+
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Express Checkout" showBack={true} />
+    <ScreenWrapper>
+      <AppBar
+        title="Checkout"
+        subtitle={`${totalCartItemCount} items`}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        
-        {/* Address Card */}
-        <DoppelCard variant="light" style={styles.cardMargin}>
-          <Text style={styles.cardTitle}>📍 Delivery Address (Shajapur)</Text>
-          <Text style={styles.addressName}>{selectedAddress.name} ({selectedAddress.label})</Text>
-          <Text style={styles.addressStreet}>{selectedAddress.street}, {selectedAddress.city}</Text>
-          <Text style={styles.addressPhone}>Phone: {selectedAddress.phone}</Text>
-        </DoppelCard>
+        {/* Delivery Address */}
+        <Text style={styles.sectionLabel}>DELIVERY ADDRESS</Text>
+        <Card variant="surface" style={styles.cardMargin}>
+          <View style={styles.addressRow}>
+            <View style={styles.addressIcon}>
+              <Text style={{ fontSize: 16 }}>📍</Text>
+            </View>
+            <View style={styles.addressInfo}>
+              <Text style={styles.addressName}>{selectedAddress.name}</Text>
+              <Text style={styles.addressLabel}>{selectedAddress.label}</Text>
+              <Text style={styles.addressStreet}>
+                {selectedAddress.street}, {selectedAddress.city}
+              </Text>
+              <Text style={styles.addressPhone}>{selectedAddress.phone}</Text>
+            </View>
+          </View>
+        </Card>
 
-        {/* Slot Selector */}
-        <DoppelCard variant="light" style={styles.cardMargin}>
-          <Text style={styles.cardTitle}>⏱️ Select Delivery Slot</Text>
-          {['30-45 Mins Express Delivery', 'Standard Evening Slot (6 PM - 8 PM)', 'Tomorrow Morning (9 AM - 11 AM)'].map((slot) => {
-            const isSelected = selectedSlot === slot;
+        {/* Delivery Slot */}
+        <Text style={styles.sectionLabel}>DELIVERY SLOT</Text>
+        <View style={styles.cardMargin}>
+          {SLOTS.map((slot) => {
+            const isActive = selectedSlot === slot.id;
             return (
               <TouchableOpacity
-                key={slot}
-                style={[styles.slotOption, isSelected && styles.slotOptionActive]}
-                onPress={() => setSelectedSlot(slot)}
+                key={slot.id}
+                style={[styles.optionRow, isActive && styles.optionRowActive]}
+                activeOpacity={0.8}
+                onPress={() => setSelectedSlot(slot.id)}
               >
-                <Text style={[styles.slotText, isSelected && styles.slotTextActive]}>{slot}</Text>
+                <Text style={styles.optionIcon}>{slot.icon}</Text>
+                <View style={styles.optionContent}>
+                  <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
+                    {slot.label}
+                  </Text>
+                  <Text style={[styles.optionSub, isActive && styles.optionSubActive]}>
+                    {slot.sub}
+                  </Text>
+                </View>
+                <View style={[styles.radio, isActive && styles.radioActive]}>
+                  {isActive && <View style={styles.radioDot} />}
+                </View>
               </TouchableOpacity>
             );
           })}
-        </DoppelCard>
+        </View>
 
-        {/* Delivery Partner Tip */}
-        <DoppelCard variant="light" style={styles.cardMargin}>
-          <Text style={styles.cardTitle}>🤝 Delivery Driver Tip (Shajapur Partner)</Text>
-          <View style={styles.tipRow}>
-            {[0, 20, 30, 50].map((amount) => {
-              const isSelected = tip === amount;
-              return (
-                <TouchableOpacity
-                  key={amount}
-                  style={[styles.tipChip, isSelected && styles.tipChipActive]}
-                  onPress={() => setTip(amount)}
-                >
-                  <Text style={[styles.tipText, isSelected && styles.tipTextActive]}>
-                    {amount === 0 ? 'No Tip' : `₹${amount}`}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </DoppelCard>
+        {/* Driver Tip */}
+        <Text style={styles.sectionLabel}>DELIVERY PARTNER TIP</Text>
+        <View style={styles.tipRow}>
+          {TIP_OPTIONS.map((amount) => {
+            const isActive = tip === amount;
+            return (
+              <TouchableOpacity
+                key={amount}
+                style={[styles.tipChip, isActive && styles.tipChipActive]}
+                onPress={() => setTip(amount)}
+              >
+                <Text style={[styles.tipText, isActive && styles.tipTextActive]}>
+                  {amount === 0 ? 'Skip' : `₹${amount}`}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
         {/* Payment Method */}
-        <DoppelCard variant="dark" style={styles.cardMargin}>
-          <Text style={styles.darkCardTitle}>💳 Select Payment Method</Text>
-          {[
-            'Instant UPI (PhonePe / GPay / Paytm)',
-            'Cash on Delivery (COD Shajapur)',
-            'Credit / Debit Card',
-          ].map((pm) => {
-            const isSelected = paymentMethod === pm;
+        <Text style={styles.sectionLabel}>PAYMENT</Text>
+        <View style={styles.cardMargin}>
+          {PAYMENT_METHODS.map((pm) => {
+            const isActive = paymentMethod === pm.id;
             return (
               <TouchableOpacity
-                key={pm}
-                style={[styles.darkSlotOption, isSelected && styles.darkSlotOptionActive]}
-                onPress={() => setPaymentMethod(pm)}
+                key={pm.id}
+                style={[styles.optionRow, isActive && styles.optionRowActive]}
+                activeOpacity={0.8}
+                onPress={() => setPaymentMethod(pm.id)}
               >
-                <Text style={[styles.darkSlotText, isSelected && styles.darkSlotTextActive]}>{pm}</Text>
+                <Text style={styles.optionIcon}>{pm.icon}</Text>
+                <View style={styles.optionContent}>
+                  <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
+                    {pm.label}
+                  </Text>
+                </View>
+                <View style={[styles.radio, isActive && styles.radioActive]}>
+                  {isActive && <View style={styles.radioDot} />}
+                </View>
               </TouchableOpacity>
             );
           })}
-        </DoppelCard>
+        </View>
 
-        {/* Place Order CTA */}
-        <GoldButton
-          title={`Confirm & Pay ₹${(totalAmountToPay + tip).toFixed(0)} →`}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* Sticky CTA */}
+      <View style={styles.stickyCta}>
+        <View>
+          <Text style={styles.stickyTotal}>₹{finalAmount.toFixed(0)}</Text>
+          <Text style={styles.stickyLabel}>Total payable</Text>
+        </View>
+        <Button
+          title="Place Order"
           onPress={handlePlaceOrder}
           variant="gold"
           size="lg"
-          style={{ marginBottom: 40 }}
+          style={{ flex: 1, marginLeft: spacing.base }}
         />
-      </ScrollView>
-    </View>
+      </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
   scroll: {
     flex: 1,
-    padding: 16,
+    padding: spacing.base,
+  },
+  sectionLabel: {
+    ...typography.captionBold,
+    color: colors.textMuted,
+    letterSpacing: 1,
+    marginBottom: spacing.sm,
+    marginTop: spacing.lg,
   },
   cardMargin: {
-    marginBottom: 14,
+    marginBottom: spacing.sm,
   },
-  cardTitle: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-    marginBottom: 10,
+  addressRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
   },
-  darkCardTitle: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#F4E8C1',
-    marginBottom: 10,
+  addressIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.md,
+    backgroundColor: colors.goldTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressInfo: {
+    flex: 1,
   },
   addressName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+  },
+  addressLabel: {
+    ...typography.captionBold,
+    color: colors.goldDeep,
+    marginTop: 1,
   },
   addressStreet: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    ...typography.small,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   addressPhone: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 4,
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
-  slotOption: {
-    backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 14,
-    marginBottom: 8,
+  // Option rows (slots + payments)
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    marginBottom: spacing.sm,
+    minHeight: minTouchTarget + 8,
   },
-  slotOptionActive: {
-    backgroundColor: '#0F1219',
-    borderColor: '#0F1219',
+  optionRowActive: {
+    backgroundColor: colors.obsidian,
+    borderColor: colors.borderGoldStrong,
   },
-  slotText: {
-    fontSize: 12,
-    color: '#334155',
-    fontWeight: '600',
+  optionIcon: {
+    fontSize: 18,
   },
-  slotTextActive: {
-    color: '#F4E8C1',
-    fontWeight: '900',
+  optionContent: {
+    flex: 1,
   },
-  darkSlotOption: {
-    backgroundColor: '#1E2330',
-    padding: 12,
-    borderRadius: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+  optionLabel: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
   },
-  darkSlotOptionActive: {
-    backgroundColor: '#D4AF37',
-    borderColor: '#D4AF37',
+  optionLabelActive: {
+    color: colors.goldSoft,
   },
-  darkSlotText: {
-    fontSize: 12,
-    color: '#94A3B8',
-    fontWeight: '600',
+  optionSub: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: 1,
   },
-  darkSlotTextActive: {
-    color: '#0F1219',
-    fontWeight: '900',
+  optionSubActive: {
+    color: 'rgba(255,255,255,0.5)',
   },
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioActive: {
+    borderColor: colors.gold,
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.gold,
+  },
+  // Tip
   tipRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   tipChip: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 10,
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.md,
+    borderRadius: radii.lg,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    minHeight: minTouchTarget,
+    justifyContent: 'center',
   },
   tipChipActive: {
-    backgroundColor: '#0F1219',
-    borderColor: '#0F1219',
+    backgroundColor: colors.obsidian,
+    borderColor: colors.borderGoldStrong,
   },
   tipText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#0F1219',
+    ...typography.bodyBold,
+    color: colors.textPrimary,
   },
   tipTextActive: {
-    color: '#F4E8C1',
+    color: colors.goldSoft,
+  },
+  // Sticky CTA
+  stickyCta: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    ...shadows.high,
+  },
+  stickyTotal: {
+    ...typography.title,
+    color: colors.textPrimary,
     fontWeight: '900',
+  },
+  stickyLabel: {
+    ...typography.caption,
+    color: colors.textMuted,
   },
 });

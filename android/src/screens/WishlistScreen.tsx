@@ -1,15 +1,12 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-} from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { ProductCard } from '../components/ProductCard';
+import { EmptyState } from '../components/EmptyState';
 import { useApp } from '../context/AppContext';
 import { PRODUCTS } from '../data/mockData';
-import { HeaderBar } from '../components/HeaderBar';
-import { ProductCard } from '../components/ProductCard';
-import { GoldButton } from '../components/GoldButton';
+import { spacing } from '../theme/tokens';
 
 export const WishlistScreen: React.FC<any> = ({ navigation }) => {
   const { wishlist } = useApp();
@@ -18,71 +15,47 @@ export const WishlistScreen: React.FC<any> = ({ navigation }) => {
 
   if (favProducts.length === 0) {
     return (
-      <View style={styles.container}>
-        <HeaderBar navigation={navigation} title="Saved Favorites" />
-        <View style={styles.emptyContainer}>
-          <Text style={{ fontSize: 44, marginBottom: 12 }}>🤍</Text>
-          <Text style={styles.emptyTitle}>No Favorites Saved Yet</Text>
-          <Text style={styles.emptyDesc}>Tap the heart icon on any tumbler, journal, book, or gift hamper to save for later.</Text>
-          <GoldButton
-            title="Explore Store Catalog"
-            onPress={() => navigation.navigate('Products')}
-            variant="gold"
-            size="md"
-            style={{ marginTop: 16 }}
-          />
-        </View>
-      </View>
+      <ScreenWrapper>
+        <AppBar title="Wishlist" onBack={() => navigation.goBack()} />
+        <EmptyState
+          emoji="♡"
+          title="No Saved Favorites"
+          description="Tap the heart icon on any product to save it to your wishlist for later."
+          actionLabel="Browse Catalog"
+          onAction={() => navigation.goBack()}
+        />
+      </ScreenWrapper>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title={`Saved Favorites (${favProducts.length})`} />
+    <ScreenWrapper>
+      <AppBar
+        title="Wishlist"
+        subtitle={`${favProducts.length} saved`}
+        onBack={() => navigation.goBack()}
+      />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.grid}>
-          {favProducts.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </View>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+      <FlatList
+        data={favProducts}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.gridRow}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => <ProductCard product={item} />}
+        ListFooterComponent={<View style={{ height: spacing['2xl'] }} />}
+      />
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
+  listContent: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
   },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F1219',
-    marginBottom: 6,
-  },
-  emptyDesc: {
-    fontSize: 12,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  scroll: {
-    flex: 1,
-    padding: 16,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  gridRow: {
+    justifyContent: 'space-between',
   },
 });

@@ -1,117 +1,173 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-} from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { Card } from '../components/Card';
+import { EmptyState } from '../components/EmptyState';
 import { useApp } from '../context/AppContext';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
+import { colors, spacing, radii, typography } from '../theme/tokens';
+
+const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  placed:    { bg: colors.infoBg,    text: colors.info },
+  packing:   { bg: colors.goldTint,  text: colors.goldDeep },
+  delivering:{ bg: colors.goldTint,  text: colors.goldDeep },
+  delivered: { bg: colors.successBg, text: colors.success },
+  cancelled: { bg: colors.errorBg,   text: colors.error },
+};
 
 export const OrdersScreen: React.FC<any> = ({ navigation }) => {
   const { orders } = useApp();
 
+  if (orders.length === 0) {
+    return (
+      <ScreenWrapper>
+        <AppBar title="My Orders" onBack={() => navigation.goBack()} />
+        <EmptyState
+          emoji="📦"
+          title="No Orders Yet"
+          description="Your order history will appear here once you place your first order."
+          actionLabel="Start Shopping"
+          onAction={() => navigation.goBack()}
+        />
+      </ScreenWrapper>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Order Receipts" showBack={true} />
+    <ScreenWrapper>
+      <AppBar title="My Orders" onBack={() => navigation.goBack()} />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {orders.map((o) => (
-          <DoppelCard key={o.id} variant="light" style={styles.orderMargin}>
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderId}>{o.id}</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusBadgeText}>{o.status.toUpperCase()}</Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {orders.map((order) => {
+          const statusColors = STATUS_COLORS[order.status] || STATUS_COLORS.placed;
+          return (
+            <Card key={order.id} variant="surface" style={styles.orderCard}>
+              {/* Header */}
+              <View style={styles.orderHeader}>
+                <View>
+                  <Text style={styles.orderId}>{order.id}</Text>
+                  <Text style={styles.orderDate}>
+                    {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric',
+                    })}
+                  </Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: statusColors.bg }]}>
+                  <Text style={[styles.statusText, { color: statusColors.text }]}>
+                    {order.status.toUpperCase()}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <Text style={styles.date}>{new Date(o.createdAt).toLocaleDateString()}</Text>
+              {/* Item Thumbnails */}
+              <View style={styles.thumbRow}>
+                {order.items.slice(0, 3).map((item, idx) => (
+                  <Image
+                    key={idx}
+                    source={{ uri: item.product.image }}
+                    style={styles.thumb}
+                  />
+                ))}
+                {order.items.length > 3 && (
+                  <View style={styles.thumbMore}>
+                    <Text style={styles.thumbMoreText}>+{order.items.length - 3}</Text>
+                  </View>
+                )}
+              </View>
 
-            <View style={styles.itemsList}>
-              {o.items.map((item, idx) => (
-                <Text key={idx} style={styles.itemText}>
-                  • {item.quantity}x {item.product.name} (₹{item.totalPrice.toFixed(0)})
-                </Text>
-              ))}
-            </View>
+              {/* Footer */}
+              <View style={styles.orderFooter}>
+                <Text style={styles.orderSlot}>{order.deliverySlot}</Text>
+                <Text style={styles.orderTotal}>₹{order.totalPaid.toFixed(0)}</Text>
+              </View>
+            </Card>
+          );
+        })}
 
-            <View style={styles.footerRow}>
-              <Text style={styles.slot}>{o.deliverySlot}</Text>
-              <Text style={styles.total}>Paid ₹{o.totalPaid.toFixed(0)}</Text>
-            </View>
-          </DoppelCard>
-        ))}
-
-        <View style={{ height: 40 }} />
+        <View style={{ height: spacing['2xl'] }} />
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
   scroll: {
     flex: 1,
-    padding: 16,
   },
-  orderMargin: {
-    marginBottom: 12,
+  scrollContent: {
+    padding: spacing.base,
+  },
+  orderCard: {
+    marginBottom: spacing.md,
   },
   orderHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
   },
   orderId: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
     fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
+  },
+  orderDate: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.sm,
   },
-  statusBadgeText: {
-    color: '#0F1219',
-    fontWeight: '900',
-    fontSize: 9,
+  statusText: {
+    ...typography.captionBold,
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
-  date: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 2,
-    marginBottom: 10,
-  },
-  itemsList: {
-    marginVertical: 6,
-  },
-  itemText: {
-    fontSize: 12,
-    color: '#334155',
-    marginBottom: 4,
-  },
-  footerRow: {
+  thumbRow: {
     flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  thumb: {
+    width: 48,
+    height: 48,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceMuted,
+  },
+  thumbMore: {
+    width: 48,
+    height: 48,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbMoreText: {
+    ...typography.captionBold,
+    color: colors.textMuted,
+  },
+  orderFooter: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-    paddingTop: 10,
+    alignItems: 'center',
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: colors.borderLight,
   },
-  slot: {
-    fontSize: 11,
-    color: '#64748B',
+  orderSlot: {
+    ...typography.caption,
+    color: colors.textSecondary,
   },
-  total: {
+  orderTotal: {
+    ...typography.subtitle,
+    color: colors.textPrimary,
     fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
   },
 });

@@ -1,13 +1,14 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
+import { PriceTag } from './PriceTag';
+import { QuantityStepper } from './QuantityStepper';
+import { colors, spacing, radii, typography, shadows, minTouchTarget } from '../theme/tokens';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const CARD_GAP = spacing.md;
+const CARD_WIDTH = (SCREEN_WIDTH - spacing.base * 2 - CARD_GAP) / 2;
 
 interface ProductCardProps {
   product: Product;
@@ -18,80 +19,74 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
   const { cart, addToCart, updateQuantity, isInWishlist, toggleWishlist } = useApp();
 
   const isFav = isInWishlist(product.id);
-  const cartItemsForProduct = cart.filter((ci) => ci.product.id === product.id);
-  const totalQtyInCart = cartItemsForProduct.reduce((acc, ci) => acc + ci.quantity, 0);
+  const cartItems = cart.filter((ci) => ci.product.id === product.id);
+  const qtyInCart = cartItems.reduce((acc, ci) => acc + ci.quantity, 0);
 
+  const handleAdd = () => addToCart(product);
   const handleIncrement = () => {
-    if (cartItemsForProduct.length > 0) {
-      updateQuantity(cartItemsForProduct[0].cartItemId, cartItemsForProduct[0].quantity + 1);
+    if (cartItems.length > 0) {
+      updateQuantity(cartItems[0].cartItemId, cartItems[0].quantity + 1);
     } else {
-      addToCart(product);
+      handleAdd();
     }
   };
-
   const handleDecrement = () => {
-    if (cartItemsForProduct.length > 0) {
-      updateQuantity(cartItemsForProduct[0].cartItemId, cartItemsForProduct[0].quantity - 1);
+    if (cartItems.length > 0) {
+      updateQuantity(cartItems[0].cartItemId, cartItems[0].quantity - 1);
     }
   };
 
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
-      style={styles.card}
+      activeOpacity={0.92}
       onPress={onPress}
+      style={styles.card}
     >
-      {/* Image Container */}
-      <View style={styles.imageWrapper}>
+      {/* Image */}
+      <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.image} />
-        
-        {/* Favorite Heart */}
+
+        {/* Wishlist */}
         <TouchableOpacity
-          style={styles.favBadge}
+          style={[styles.favBtn, isFav && styles.favBtnActive]}
           onPress={() => toggleWishlist(product.id)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={{ fontSize: 11 }}>{isFav ? '❤️' : '🤍'}</Text>
+          <Text style={styles.favIcon}>{isFav ? '♥' : '♡'}</Text>
         </TouchableOpacity>
 
-        {/* Rating Badge */}
-        <View style={styles.ratingBadge}>
-          <Text style={styles.starText}>★</Text>
-          <Text style={styles.ratingText}>{product.rating}</Text>
+        {/* Rating */}
+        <View style={styles.ratingPill}>
+          <Text style={styles.ratingStar}>★</Text>
+          <Text style={styles.ratingValue}>{product.rating}</Text>
         </View>
       </View>
 
-      {/* Product Content */}
-      <View style={styles.info}>
-        <Text style={styles.categoryTag} numberOfLines={1}>
+      {/* Content */}
+      <View style={styles.content}>
+        <Text style={styles.category} numberOfLines={1}>
           {product.categoryName}
         </Text>
-
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.name} numberOfLines={2}>
           {product.name}
         </Text>
 
-        <View style={styles.footerRow}>
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>₹{product.price.toFixed(0)}</Text>
-            {product.originalPrice && (
-              <Text style={styles.originalPrice}>₹{product.originalPrice.toFixed(0)}</Text>
-            )}
-          </View>
+        {/* Footer: Price + Action */}
+        <View style={styles.footer}>
+          <PriceTag price={product.price} originalPrice={product.originalPrice} size="sm" />
 
-          {totalQtyInCart > 0 ? (
-            <View style={styles.qtyPill}>
-              <TouchableOpacity style={styles.qtyBtn} onPress={handleDecrement}>
-                <Text style={styles.qtyBtnText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.qtyCount}>{totalQtyInCart}</Text>
-              <TouchableOpacity style={styles.qtyBtn} onPress={handleIncrement}>
-                <Text style={styles.qtyBtnText}>+</Text>
-              </TouchableOpacity>
-            </View>
+          {qtyInCart > 0 ? (
+            <QuantityStepper
+              quantity={qtyInCart}
+              onIncrement={handleIncrement}
+              onDecrement={handleDecrement}
+              size="sm"
+            />
           ) : (
             <TouchableOpacity
               style={styles.addBtn}
-              onPress={() => addToCart(product)}
+              onPress={handleAdd}
+              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
             >
               <Text style={styles.addBtnText}>+ Add</Text>
             </TouchableOpacity>
@@ -104,131 +99,105 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
 
 const styles = StyleSheet.create({
   card: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    overflow: 'hidden',
+    width: CARD_WIDTH,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-    shadowColor: '#0F1219',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    marginBottom: CARD_GAP,
+    ...shadows.low,
   },
-  imageWrapper: {
+  imageContainer: {
     width: '100%',
-    height: 130,
-    backgroundColor: '#F8FAFC',
-    position: 'relative',
+    height: 140,
+    backgroundColor: colors.surfaceMuted,
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  favBadge: {
+  favBtn: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 5,
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.low,
   },
-  ratingBadge: {
+  favBtnActive: {
+    backgroundColor: colors.error,
+  },
+  favIcon: {
+    fontSize: 15,
+    color: colors.textMuted,
+  },
+  ratingPill: {
     position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: 'rgba(15, 18, 25, 0.85)',
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    bottom: spacing.sm,
+    left: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    backgroundColor: 'rgba(15, 18, 25, 0.8)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radii.sm,
   },
-  starText: {
-    color: '#F59E0B',
+  ratingStar: {
+    color: colors.warning,
     fontSize: 10,
   },
-  ratingText: {
-    color: '#FFFFFF',
+  ratingValue: {
+    color: colors.textOnDark,
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  info: {
-    padding: 10,
-    justifyContent: 'space-between',
+  content: {
+    padding: spacing.md,
     flex: 1,
+    justifyContent: 'space-between',
   },
-  categoryTag: {
-    color: '#B8860B',
-    fontSize: 9,
-    fontWeight: '800',
+  category: {
+    ...typography.caption,
+    color: colors.goldDeep,
     textTransform: 'uppercase',
-    marginBottom: 2,
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
   },
-  title: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#0F1219',
-    lineHeight: 16,
-    marginBottom: 8,
-    minHeight: 32,
+  name: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: spacing.md,
+    minHeight: 36,
   },
-  footerRow: {
+  footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 'auto',
   },
-  priceContainer: {
-    flexDirection: 'column',
-  },
-  price: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-  },
-  originalPrice: {
-    fontSize: 10,
-    color: '#94A3B8',
-    textDecorationLine: 'line-through',
-  },
   addBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+    backgroundColor: colors.obsidian,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.full,
+    minHeight: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderColor: colors.borderGoldStrong,
   },
   addBtnText: {
-    color: '#F4E8C1',
+    color: colors.goldSoft,
     fontWeight: '800',
-    fontSize: 11,
-  },
-  qtyPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0F1219',
-    borderRadius: 14,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    gap: 6,
-  },
-  qtyBtn: {
-    paddingHorizontal: 4,
-  },
-  qtyBtnText: {
-    color: '#F4E8C1',
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
-  qtyCount: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 11,
+    fontSize: 12,
   },
 });

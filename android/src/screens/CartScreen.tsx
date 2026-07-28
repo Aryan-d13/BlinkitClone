@@ -1,16 +1,13 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { CartItemRow } from '../components/CartItemRow';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
+import { EmptyState } from '../components/EmptyState';
 import { useApp } from '../context/AppContext';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
-import { GoldButton } from '../components/GoldButton';
+import { colors, spacing, typography, radii, shadows } from '../theme/tokens';
 
 export const CartScreen: React.FC<any> = ({ navigation }) => {
   const {
@@ -25,215 +22,157 @@ export const CartScreen: React.FC<any> = ({ navigation }) => {
 
   if (cart.length === 0) {
     return (
-      <View style={styles.container}>
-        <HeaderBar navigation={navigation} title="Shopping Bag" showBack={true} />
-        <View style={styles.emptyContainer}>
-          <Text style={{ fontSize: 44, marginBottom: 12 }}>🛍️</Text>
-          <Text style={styles.emptyTitle}>Your Bag is Empty</Text>
-          <Text style={styles.emptyDesc}>Explore DC Stores aesthetic tumblers, leather journals, books & custom gift hampers.</Text>
-          <GoldButton
-            title="Explore Store Catalog"
-            onPress={() => navigation.navigate('Products')}
-            variant="gold"
-            size="lg"
-            style={{ marginTop: 16 }}
-          />
-        </View>
-      </View>
+      <ScreenWrapper>
+        <AppBar title="Shopping Bag" onBack={() => navigation.goBack()} />
+        <EmptyState
+          emoji="🛍️"
+          title="Your Bag is Empty"
+          description="Add aesthetic tumblers, journals, books & custom gift hampers to your bag."
+          actionLabel="Explore Catalog"
+          onAction={() => {
+            navigation.goBack();
+            navigation.navigate('Products');
+          }}
+        />
+      </ScreenWrapper>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title={`Shopping Bag (${totalCartItemCount})`} showBack={true} />
+    <ScreenWrapper>
+      <AppBar
+        title="Shopping Bag"
+        subtitle={`${totalCartItemCount} item${totalCartItemCount > 1 ? 's' : ''}`}
+        onBack={() => navigation.goBack()}
+      />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {cart.map((item) => (
-          <DoppelCard key={item.cartItemId} variant="light" style={styles.itemCardMargin}>
-            <View style={styles.cartItemRow}>
-              <Image source={{ uri: item.product.image }} style={styles.itemImage} />
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName} numberOfLines={1}>{item.product.name}</Text>
-                <Text style={styles.itemCategory}>{item.product.categoryName}</Text>
-                <Text style={styles.itemPrice}>₹{item.unitPrice.toFixed(0)}</Text>
+      <FlatList
+        data={cart}
+        keyExtractor={(item) => item.cartItemId}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <CartItemRow item={item} onUpdateQty={updateQuantity} />
+        )}
+        ListFooterComponent={
+          <View>
+            {/* Bill Breakdown */}
+            <Card variant="goldTint" style={styles.billCard}>
+              <Text style={styles.billTitle}>Bill Summary</Text>
+
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Item Subtotal</Text>
+                <Text style={styles.billValue}>₹{cartSubtotal.toFixed(0)}</Text>
+              </View>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Express Delivery</Text>
+                <Text style={[styles.billValue, deliveryFee === 0 && styles.freeText]}>
+                  {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
+                </Text>
+              </View>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>GST & Tax</Text>
+                <Text style={styles.billValue}>₹{tax.toFixed(0)}</Text>
               </View>
 
-              <View style={styles.qtyPill}>
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                >
-                  <Text style={styles.qtyBtnText}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.qtyText}>{item.quantity}</Text>
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                >
-                  <Text style={styles.qtyBtnText}>+</Text>
-                </TouchableOpacity>
+              <View style={styles.divider} />
+
+              <View style={styles.billRow}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalValue}>₹{totalAmountToPay.toFixed(0)}</Text>
               </View>
-            </View>
-          </DoppelCard>
-        ))}
+            </Card>
 
-        {/* Financial Summary Doppel Card */}
-        <DoppelCard variant="gold" style={styles.summaryMargin}>
-          <Text style={styles.summaryTitle}>Bill Breakdown</Text>
-          
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Item Subtotal</Text>
-            <Text style={styles.summaryValue}>₹{cartSubtotal.toFixed(0)}</Text>
+            <View style={{ height: 100 }} />
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Express Delivery (Shajapur)</Text>
-            <Text style={styles.summaryValue}>
-              {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
-            </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>GST & Service Tax</Text>
-            <Text style={styles.summaryValue}>₹{tax.toFixed(0)}</Text>
-          </View>
+        }
+      />
 
-          <View style={styles.divider} />
-
-          <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total Payable</Text>
-            <Text style={styles.totalValue}>₹{totalAmountToPay.toFixed(0)}</Text>
-          </View>
-        </DoppelCard>
-
-        <GoldButton
-          title="Proceed to Express Checkout →"
+      {/* Sticky CTA */}
+      <View style={styles.stickyCta}>
+        <View>
+          <Text style={styles.stickyTotal}>₹{totalAmountToPay.toFixed(0)}</Text>
+          <Text style={styles.stickyLabel}>incl. taxes</Text>
+        </View>
+        <Button
+          title="Checkout"
           onPress={() => navigation.navigate('Checkout')}
-          variant="dark"
+          variant="gold"
           size="lg"
-          style={{ marginBottom: 40 }}
+          style={{ flex: 1, marginLeft: spacing.base }}
         />
-      </ScrollView>
-    </View>
+      </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
+  listContent: {
+    padding: spacing.base,
   },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
+  billCard: {
+    marginTop: spacing.sm,
   },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#0F1219',
-    marginBottom: 6,
+  billTitle: {
+    ...typography.subtitle,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
-  emptyDesc: {
-    fontSize: 12,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  scroll: {
-    flex: 1,
-    padding: 16,
-  },
-  itemCardMargin: {
-    marginBottom: 12,
-  },
-  cartItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-  },
-  itemInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  itemName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
-  },
-  itemCategory: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 2,
-  },
-  itemPrice: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-    marginTop: 4,
-  },
-  qtyPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#0F1219',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  qtyBtn: {
-    paddingHorizontal: 6,
-  },
-  qtyBtnText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#F4E8C1',
-  },
-  qtyText: {
-    fontWeight: '900',
-    fontSize: 13,
-    color: '#FFFFFF',
-  },
-  summaryMargin: {
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  summaryTitle: {
-    fontWeight: '900',
-    fontSize: 16,
-    color: '#0F1219',
-    marginBottom: 12,
-  },
-  summaryRow: {
+  billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
-  summaryLabel: {
-    color: '#64748B',
-    fontSize: 12,
+  billLabel: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
-  summaryValue: {
-    fontWeight: 'bold',
-    color: '#0F1219',
-    fontSize: 12,
+  billValue: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+    fontVariant: ['tabular-nums'],
+  },
+  freeText: {
+    color: colors.success,
+    fontWeight: '800',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(212, 175, 55, 0.3)',
-    marginVertical: 10,
+    backgroundColor: colors.borderGold,
+    marginVertical: spacing.md,
   },
   totalLabel: {
+    ...typography.subtitle,
+    color: colors.textPrimary,
     fontWeight: '900',
-    color: '#0F1219',
-    fontSize: 15,
   },
   totalValue: {
+    ...typography.headline,
+    color: colors.goldDeep,
+    fontSize: 22,
+  },
+  stickyCta: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    ...shadows.high,
+  },
+  stickyTotal: {
+    ...typography.title,
+    color: colors.textPrimary,
     fontWeight: '900',
-    color: '#B8860B',
-    fontSize: 18,
+  },
+  stickyLabel: {
+    ...typography.caption,
+    color: colors.textMuted,
   },
 });

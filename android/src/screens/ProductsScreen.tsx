@@ -1,135 +1,92 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import { PRODUCTS, CATEGORIES } from '../data/mockData';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
+import { View, Text, FlatList, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { CategoryPill } from '../components/CategoryPill';
 import { ProductCard } from '../components/ProductCard';
+import { EmptyState } from '../components/EmptyState';
+import { PRODUCTS, CATEGORIES } from '../data/mockData';
+import { colors, spacing, typography } from '../theme/tokens';
 
 export const ProductsScreen: React.FC<any> = ({ route, navigation }) => {
-  const { catId } = route.params || {};
-  const [selectedCat, setSelectedCat] = useState(catId || 'all');
+  const initialCat = route?.params?.catId || 'all';
+  const [selectedCat, setSelectedCat] = useState(initialCat);
 
-  const filteredProducts = PRODUCTS.filter((p) => {
+  const filtered = PRODUCTS.filter((p) => {
     if (selectedCat === 'all') return true;
     return p.categoryId === selectedCat;
   });
 
+  const activeCatName = selectedCat === 'all'
+    ? 'All Products'
+    : CATEGORIES.find((c) => c.id === selectedCat)?.name || 'Products';
+
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Store Catalog" showBack={true} />
+    <ScreenWrapper>
+      <AppBar
+        title={activeCatName}
+        subtitle={`${filtered.length} items`}
+        onBack={() => navigation.goBack()}
+      />
 
-      {/* Department Filter Bar */}
-      <View style={styles.catBar}>
+      {/* Sticky Filter Bar */}
+      <View style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity
-            style={[styles.catChip, selectedCat === 'all' && styles.catChipActive]}
+          <CategoryPill
+            label="All"
+            image={CATEGORIES[0].image}
+            isActive={selectedCat === 'all'}
             onPress={() => setSelectedCat('all')}
-          >
-            <Text style={[styles.catChipText, selectedCat === 'all' && styles.catChipTextActive]}>
-              All ({PRODUCTS.length})
-            </Text>
-          </TouchableOpacity>
-
-          {CATEGORIES.map((c) => {
-            const isActive = selectedCat === c.id;
-            return (
-              <TouchableOpacity
-                key={c.id}
-                style={[styles.catChip, isActive && styles.catChipActive]}
-                onPress={() => setSelectedCat(c.id)}
-              >
-                <Text style={[styles.catChipText, isActive && styles.catChipTextActive]}>
-                  {c.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+          />
+          {CATEGORIES.map((cat) => (
+            <CategoryPill
+              key={cat.id}
+              label={cat.name}
+              image={cat.image}
+              isActive={selectedCat === cat.id}
+              onPress={() => setSelectedCat(cat.id)}
+            />
+          ))}
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        <DoppelCard variant="gold" style={styles.headerCard}>
-          <Text style={styles.cardTag}>DC STORES • SHAJAPUR CATALOG</Text>
-          <Text style={styles.cardTitle}>Browse Aesthetic Retail Collection</Text>
-          <Text style={styles.cardSub}>Showing {filteredProducts.length} items available for 30-45 Mins Express Delivery.</Text>
-        </DoppelCard>
-
-        <View style={styles.productGrid}>
-          {filteredProducts.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </View>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+      {filtered.length > 0 ? (
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.gridRow}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => <ProductCard product={item} />}
+          ListFooterComponent={<View style={{ height: spacing['2xl'] }} />}
+        />
+      ) : (
+        <EmptyState
+          emoji="📭"
+          title="No Products Found"
+          description="This category is empty right now. Check back soon for new arrivals!"
+          actionLabel="View All Products"
+          onAction={() => setSelectedCat('all')}
+        />
+      )}
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  catBar: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+  filterBar: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.border,
   },
-  catChip: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    marginRight: 8,
+  listContent: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
   },
-  catChipActive: {
-    backgroundColor: '#0F1219',
-  },
-  catChipText: {
-    color: '#475569',
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  catChipTextActive: {
-    color: '#F4E8C1',
-    fontWeight: '900',
-  },
-  scroll: {
-    flex: 1,
-    padding: 16,
-  },
-  headerCard: {
-    marginBottom: 16,
-  },
-  cardTag: {
-    color: '#B8860B',
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#0F1219',
-  },
-  cardSub: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 4,
-  },
-  productGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  gridRow: {
+    justifyContent: 'space-between',
   },
 });

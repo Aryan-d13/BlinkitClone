@@ -1,156 +1,250 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
 import { useApp } from '../context/AppContext';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
-import { GoldButton } from '../components/GoldButton';
+import { colors, spacing, radii, typography } from '../theme/tokens';
+import { CommonActions } from '@react-navigation/native';
+
+const STEPS = [
+  { label: 'Order Placed', desc: 'Your order has been confirmed', done: true },
+  { label: 'Packing', desc: 'Wrapping with care & quality check', done: true },
+  { label: 'Out for Delivery', desc: 'Vikram Singh is on the way', done: false },
+  { label: 'Delivered', desc: 'Enjoy your purchase!', done: false },
+];
 
 export const OrderSuccessScreen: React.FC<any> = ({ route, navigation }) => {
-  const { orderId } = route.params || {};
+  const { orderId } = route?.params || {};
   const { orders } = useApp();
+  const order = orders.find((o) => o.id === orderId) || orders[0];
 
-  const currentOrder = orders.find((o) => o.id === orderId) || orders[0];
+  const handleContinue = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'MainTabs' }],
+      })
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Order Confirmed" showBack={false} />
-
-      <ScrollView style={styles.scroll} contentContainerStyle={{ alignItems: 'center' }}>
-        <Text style={{ fontSize: 54, marginTop: 20, marginBottom: 10 }}>🎉</Text>
-        
-        <View style={styles.badgePill}>
-          <Text style={styles.badgeText}>SHAJAPUR EXPRESS • ORDER CONFIRMED</Text>
+    <ScreenWrapper>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Celebration */}
+        <View style={styles.celebration}>
+          <Text style={styles.checkmark}>✓</Text>
         </View>
 
-        <Text style={styles.title}>Thank You for Shopping!</Text>
-        <Text style={styles.subTitle}>Order ID: {currentOrder ? currentOrder.id : 'ORD-DC9824'}</Text>
+        <View style={styles.confirmBadge}>
+          <Text style={styles.confirmBadgeText}>ORDER CONFIRMED</Text>
+        </View>
 
-        {/* Live Stepper Doppel Card */}
-        <DoppelCard variant="dark" style={styles.stepperMargin}>
-          <Text style={styles.stepperHeader}>⚡ 30-45 Mins Live Delivery Stepper</Text>
-          
-          <View style={styles.stepRow}>
-            <View style={[styles.stepDot, styles.stepDotActive]} />
-            <View style={styles.stepInfo}>
-              <Text style={styles.stepTitle}>Order Placed</Text>
-              <Text style={styles.stepDesc}>DC Stores system acknowledged your request</Text>
+        <Text style={styles.thankYou}>Thank You!</Text>
+        {order && (
+          <Text style={styles.orderId}>
+            {order.id} · ₹{order.totalPaid.toFixed(0)}
+          </Text>
+        )}
+
+        {/* Delivery Stepper */}
+        <Card variant="dark" style={styles.stepperCard}>
+          <Text style={styles.stepperTitle}>⚡ Live Delivery Tracker</Text>
+
+          {STEPS.map((step, idx) => (
+            <View key={step.label}>
+              <View style={styles.stepRow}>
+                <View style={[styles.stepDot, step.done && styles.stepDotDone]} />
+                <View style={styles.stepContent}>
+                  <Text style={[styles.stepLabel, step.done && styles.stepLabelDone]}>
+                    {step.label}
+                  </Text>
+                  <Text style={styles.stepDesc}>{step.desc}</Text>
+                </View>
+              </View>
+              {idx < STEPS.length - 1 && (
+                <View style={[styles.stepLine, step.done && styles.stepLineDone]} />
+              )}
             </View>
-          </View>
+          ))}
+        </Card>
 
-          <View style={styles.stepLine} />
-
-          <View style={styles.stepRow}>
-            <View style={[styles.stepDot, styles.stepDotActive]} />
-            <View style={styles.stepInfo}>
-              <Text style={styles.stepTitle}>Packaging & Quality Check</Text>
-              <Text style={styles.stepDesc}>Packing tumblers/stationery with luxury gift ribbon</Text>
+        {/* Driver Info */}
+        {order?.driverName && (
+          <Card variant="surface" style={styles.driverCard}>
+            <View style={styles.driverRow}>
+              <View style={styles.driverAvatar}>
+                <Text style={{ fontSize: 20 }}>🏍️</Text>
+              </View>
+              <View style={styles.driverInfo}>
+                <Text style={styles.driverName}>{order.driverName}</Text>
+                <Text style={styles.driverPhone}>{order.driverPhone}</Text>
+              </View>
+              <View style={styles.callBtn}>
+                <Text style={{ fontSize: 16 }}>📞</Text>
+              </View>
             </View>
-          </View>
+          </Card>
+        )}
 
-          <View style={styles.stepLine} />
-
-          <View style={styles.stepRow}>
-            <View style={styles.stepDot} />
-            <View style={styles.stepInfo}>
-              <Text style={styles.stepTitle}>Out for Delivery</Text>
-              <Text style={styles.stepDesc}>Vikram Singh is heading to your Shajapur location</Text>
-            </View>
-          </View>
-        </DoppelCard>
-
-        {/* Return Button */}
-        <GoldButton
-          title="Return to Store Catalog"
-          onPress={() => navigation.navigate('Store')}
+        <Button
+          title="Continue Shopping"
+          onPress={handleContinue}
           variant="gold"
           size="lg"
-          style={{ width: '100%', marginBottom: 40 }}
+          fullWidth
+          style={styles.continueBtn}
         />
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
   scroll: {
     flex: 1,
-    padding: 20,
   },
-  badgePill: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
-    marginBottom: 8,
+  scrollContent: {
+    padding: spacing.base,
+    alignItems: 'center',
   },
-  badgeText: {
-    color: '#0F1219',
-    fontSize: 10,
+  celebration: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing['2xl'],
+    marginBottom: spacing.base,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  checkmark: {
+    fontSize: 32,
+    color: colors.obsidian,
     fontWeight: '900',
-    letterSpacing: 1,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#0F1219',
-    marginBottom: 4,
+  confirmBadge: {
+    backgroundColor: colors.goldTint,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.full,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
-  subTitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginBottom: 20,
+  confirmBadgeText: {
+    ...typography.captionBold,
+    color: colors.goldDeep,
+    letterSpacing: 1.5,
   },
-  stepperMargin: {
+  thankYou: {
+    ...typography.headline,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  orderId: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+  },
+  stepperCard: {
     width: '100%',
-    marginBottom: 24,
+    marginBottom: spacing.base,
   },
-  stepperHeader: {
-    color: '#D4AF37',
-    fontWeight: '900',
-    fontSize: 14,
-    marginBottom: 16,
+  stepperTitle: {
+    ...typography.subtitle,
+    color: colors.gold,
+    marginBottom: spacing.lg,
   },
   stepRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    alignItems: 'flex-start',
+    gap: spacing.md,
   },
   stepDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: '#334155',
+    marginTop: 2,
   },
-  stepDotActive: {
-    backgroundColor: '#D4AF37',
+  stepDotDone: {
+    backgroundColor: colors.gold,
+  },
+  stepContent: {
+    flex: 1,
+  },
+  stepLabel: {
+    ...typography.bodyBold,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  stepLabelDone: {
+    color: colors.textOnDark,
+  },
+  stepDesc: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   stepLine: {
     width: 2,
-    height: 20,
+    height: 24,
     backgroundColor: '#334155',
-    marginLeft: 7,
-    marginVertical: 4,
+    marginLeft: 9,
+    marginVertical: spacing.xs,
   },
-  stepInfo: {
+  stepLineDone: {
+    backgroundColor: colors.gold,
+  },
+  driverCard: {
+    width: '100%',
+    marginBottom: spacing.xl,
+  },
+  driverRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  driverAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  driverInfo: {
     flex: 1,
   },
-  stepTitle: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 13,
+  driverName: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
   },
-  stepDesc: {
-    color: '#94A3B8',
-    fontSize: 11,
+  driverPhone: {
+    ...typography.caption,
+    color: colors.textMuted,
     marginTop: 2,
+  },
+  callBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.goldTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderGold,
+  },
+  continueBtn: {
+    marginBottom: spacing['2xl'],
   },
 });

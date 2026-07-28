@@ -1,137 +1,128 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
-import { PRODUCTS } from '../data/mockData';
-import { HeaderBar } from '../components/HeaderBar';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { SearchBar } from '../components/SearchBar';
 import { ProductCard } from '../components/ProductCard';
+import { SectionHeader } from '../components/SectionHeader';
+import { EmptyState } from '../components/EmptyState';
+import { PRODUCTS } from '../data/mockData';
+import { colors, spacing, typography, radii, minTouchTarget } from '../theme/tokens';
+
+const TRENDING_TAGS = ['Insulated Tumbler', 'Leather Journal', 'Atomic Habits', 'Soy Candle', 'Gift Hamper', 'Highlighters'];
 
 export const SearchScreen: React.FC<any> = ({ route, navigation }) => {
-  const { q } = route.params || {};
-  const [query, setQuery] = useState(q || '');
+  const initialQuery = route?.params?.q || '';
+  const [query, setQuery] = useState(initialQuery);
 
-  const searchResults = PRODUCTS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.categoryName.toLowerCase().includes(query.toLowerCase()) ||
-      p.description.toLowerCase().includes(query.toLowerCase())
-  );
+  const results = query.trim()
+    ? PRODUCTS.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.categoryName.toLowerCase().includes(query.toLowerCase()) ||
+          p.description.toLowerCase().includes(query.toLowerCase())
+      )
+    : [];
+
+  const showResults = query.trim().length > 0;
 
   return (
-    <View style={styles.container}>
-      <HeaderBar navigation={navigation} title="Store Search" />
-
-      {/* Input Row */}
-      <View style={styles.searchBarSection}>
-        <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            placeholder="Search Tumblers, Journals, Books, Gifts..."
-            placeholderTextColor="#94A3B8"
-            style={styles.searchInput}
-            value={query}
-            onChangeText={setQuery}
-            autoFocus={!q}
-          />
-        </View>
+    <ScreenWrapper>
+      {/* Search header */}
+      <View style={styles.headerBar}>
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          autoFocus={!initialQuery}
+          placeholder="Search tumblers, journals, books..."
+        />
       </View>
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.resultsCount}>
-          {query.trim() ? `Showing ${searchResults.length} results for "${query}"` : '🔥 Trending Search Tags'}
-        </Text>
-
-        {!query.trim() && (
-          <View style={styles.tagRow}>
-            {['Insulated Tumbler', 'Leather Journal', 'Atomic Habits', 'Soy Candle', 'Pastel Highlighters'].map((tag) => (
+      {showResults ? (
+        results.length > 0 ? (
+          <FlatList
+            data={results}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.gridRow}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <Text style={styles.resultCount}>
+                {results.length} result{results.length !== 1 ? 's' : ''} for "{query}"
+              </Text>
+            }
+          renderItem={({ item }) => (
+              <ProductCard product={item} />
+            )}
+          />
+        ) : (
+          <EmptyState
+            emoji="🔍"
+            title="No Results Found"
+            description={`We couldn't find any products matching "${query}". Try a different search term.`}
+          />
+        )
+      ) : (
+        <View style={styles.tagSection}>
+          <SectionHeader title="Trending Searches" />
+          <View style={styles.tagGrid}>
+            {TRENDING_TAGS.map((tag) => (
               <TouchableOpacity
                 key={tag}
-                style={styles.tagChip}
+                style={styles.tag}
                 onPress={() => setQuery(tag)}
               >
                 <Text style={styles.tagText}>{tag}</Text>
               </TouchableOpacity>
             ))}
           </View>
-        )}
-
-        <View style={styles.grid}>
-          {searchResults.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
         </View>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+      )}
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
+  headerBar: {
+    backgroundColor: colors.obsidian,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderGold,
   },
-  searchBarSection: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+  listContent: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
   },
-  searchBox: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+  gridRow: {
+    justifyContent: 'space-between',
   },
-  searchIcon: {
-    fontSize: 14,
-    marginRight: 8,
+  resultCount: {
+    ...typography.small,
+    color: colors.textSecondary,
+    marginBottom: spacing.base,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 13,
-    color: '#0F1219',
-    fontWeight: '500',
+  tagSection: {
+    padding: spacing.base,
   },
-  scroll: {
-    flex: 1,
-    padding: 16,
-  },
-  resultsCount: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  tagRow: {
+  tagGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.sm,
   },
-  tagChip: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+  tag: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    minHeight: minTouchTarget,
+    justifyContent: 'center',
   },
   tagText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#0F1219',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    ...typography.smallBold,
+    color: colors.textPrimary,
   },
 });

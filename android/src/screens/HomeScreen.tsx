@@ -1,313 +1,261 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  TextInput,
-  StatusBar,
-} from 'react-native';
+import { View, Text, FlatList, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppBar } from '../components/AppBar';
+import { SearchBar } from '../components/SearchBar';
+import { Card } from '../components/Card';
+import { CategoryPill } from '../components/CategoryPill';
+import { SectionHeader } from '../components/SectionHeader';
+import { ProductCard } from '../components/ProductCard';
+import { Button } from '../components/Button';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES, PRODUCTS } from '../data/mockData';
-import { HeaderBar } from '../components/HeaderBar';
-import { DoppelCard } from '../components/DoppelCard';
-import { GoldButton } from '../components/GoldButton';
-import { ProductCard } from '../components/ProductCard';
+import { SITE_CONTENT } from '../config/siteContent';
+import { colors, spacing, typography, radii } from '../theme/tokens';
 
 export const HomeScreen: React.FC<any> = ({ navigation }) => {
-  const [selectedCat, setSelectedCat] = useState('cat_all');
+  const { totalCartItemCount, cartSubtotal } = useApp();
+  const [selectedCat, setSelectedCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredProducts = PRODUCTS.filter((p) => {
-    if (selectedCat === 'cat_all') return true;
+    if (selectedCat === 'all') return true;
     return p.categoryId === selectedCat;
   });
 
-  const spotlightProduct = PRODUCTS[0];
+  const CartBadge = () => (
+    <TouchableOpacity
+      style={styles.cartBadge}
+      onPress={() => navigation.navigate('Cart')}
+    >
+      <Text style={styles.cartIcon}>🛍</Text>
+      {totalCartItemCount > 0 && (
+        <View style={styles.cartCount}>
+          <Text style={styles.cartCountText}>{totalCartItemCount}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F1219" />
-      
-      {/* Native Header Bar */}
-      <HeaderBar navigation={navigation} />
+    <ScreenWrapper>
+      <AppBar rightAction={<CartBadge />} />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        
-        {/* Search Input Box */}
-        <View style={styles.searchSection}>
-          <View style={styles.searchBox}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              placeholder="Search Tumblers, Journals, Books, Gifts..."
-              placeholderTextColor="#94A3B8"
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={() => navigation.navigate('Search', { q: searchQuery })}
-            />
-          </View>
-        </View>
-
-        {/* Hero Doppel Card */}
-        <DoppelCard variant="dark" style={styles.heroCardMargin}>
-          <Text style={styles.heroEyebrow}>✨ DC STORES • SHAJAPUR, MP</Text>
-          <Text style={styles.heroTitle}>
-            Aesthetic Tumblers, Journals, Books & Gifts
-          </Text>
-          <Text style={styles.heroDesc}>
-            Shop high-grade stainless tumblers, leather journals, viral books, and luxury gift hampers with 30-45 mins express local delivery in Shajapur.
-          </Text>
-
-          <GoldButton
-            title="Browse Full Store Catalog →"
-            onPress={() => navigation.navigate('Products')}
-            variant="gold"
-            size="md"
-            style={{ marginTop: 12, alignSelf: 'flex-start' }}
+      <FlatList
+        data={filteredProducts}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.gridRow}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <ProductCard
+            product={item}
+            onPress={() => navigation.navigate('Products', { catId: item.categoryId })}
           />
-        </DoppelCard>
+        )}
+        ListHeaderComponent={
+          <View>
+            {/* Search */}
+            <View style={styles.searchContainer}>
+              <SearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmit={() => navigation.navigate('Search', { q: searchQuery })}
+                placeholder={SITE_CONTENT.navigation.searchPlaceholder}
+              />
+            </View>
 
-        {/* Horizontal Category Carousel */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Explore Departments</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
-            <Text style={styles.seeAllText}>See All →</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.catScroll}
-          contentContainerStyle={{ paddingRight: 16 }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[styles.catChip, selectedCat === 'cat_all' && styles.catChipActive]}
-            onPress={() => setSelectedCat('cat_all')}
-          >
-            <Text style={[styles.catChipText, selectedCat === 'cat_all' && styles.catChipTextActive]}>
-              All Items
-            </Text>
-          </TouchableOpacity>
-          {CATEGORIES.map((cat) => {
-            const isActive = selectedCat === cat.id;
-            return (
-              <TouchableOpacity
-                key={cat.id}
-                activeOpacity={0.8}
-                style={[styles.catChip, isActive && styles.catChipActive]}
-                onPress={() => setSelectedCat(cat.id)}
-              >
-                <Text style={[styles.catChipText, isActive && styles.catChipTextActive]}>
-                  {cat.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* Spotlight Card */}
-        {selectedCat === 'cat_all' && (
-          <View style={styles.spotlightSection}>
-            <Text style={styles.spotlightLabel}>🌟 SPOTLIGHT RECOMMENDED</Text>
-            <DoppelCard variant="light">
-              <View style={styles.spotlightRow}>
-                <Image source={{ uri: spotlightProduct.image }} style={styles.spotlightImage} />
-                <View style={styles.spotlightInfo}>
-                  <Text style={styles.spotlightCat}>{spotlightProduct.categoryName}</Text>
-                  <Text style={styles.spotlightTitle}>{spotlightProduct.name}</Text>
-                  <Text style={styles.spotlightPrice}>₹{spotlightProduct.price.toFixed(0)}</Text>
-                  <GoldButton
-                    title="+ Add to Bag"
-                    onPress={() => navigation.navigate('Products')}
-                    variant="dark"
-                    size="sm"
-                    style={{ marginTop: 8 }}
-                  />
+            {/* Hero Banner */}
+            <Card variant="dark" style={styles.heroBanner}>
+              <View style={styles.heroRow}>
+                <View style={styles.heroContent}>
+                  <View style={styles.expressPill}>
+                    <Text style={styles.expressPillText}>⚡ SHAJAPUR EXPRESS</Text>
+                  </View>
+                  <Text style={styles.heroTitle}>{SITE_CONTENT.homePage.heroTitle}</Text>
+                  <Text style={styles.heroSub}>30-45 mins delivery across Shajapur</Text>
                 </View>
               </View>
-            </DoppelCard>
-          </View>
-        )}
+              <Button
+                title="Browse Full Catalog"
+                onPress={() => navigation.navigate('Products')}
+                variant="gold"
+                size="sm"
+                style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
+              />
+            </Card>
 
-        {/* Popular Product Grid */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular Products</Text>
-          <Text style={styles.itemCount}>({filteredProducts.length} items)</Text>
-        </View>
-
-        <View style={styles.grid}>
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onPress={() => navigation.navigate('Products', { catId: product.categoryId })}
+            {/* Category Pills */}
+            <SectionHeader
+              title="Departments"
+              actionLabel="See all"
+              onAction={() => navigation.navigate('Categories')}
             />
-          ))}
-        </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.catScroll}
+              contentContainerStyle={{ paddingRight: spacing.base }}
+            >
+              <CategoryPill
+                label="All"
+                image={CATEGORIES[0].image}
+                isActive={selectedCat === 'all'}
+                onPress={() => setSelectedCat('all')}
+              />
+              {CATEGORIES.map((cat) => (
+                <CategoryPill
+                  key={cat.id}
+                  label={cat.name}
+                  image={cat.image}
+                  isActive={selectedCat === cat.id}
+                  onPress={() => setSelectedCat(cat.id)}
+                />
+              ))}
+            </ScrollView>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+            {/* Grid Header */}
+            <SectionHeader title="Popular" count={filteredProducts.length} />
+          </View>
+        }
+        ListFooterComponent={<View style={{ height: spacing['2xl'] }} />}
+      />
+
+      {/* Floating Cart Bar */}
+      {totalCartItemCount > 0 && (
+        <TouchableOpacity
+          style={styles.floatingCart}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Cart')}
+        >
+          <View style={styles.floatingCartLeft}>
+            <Text style={styles.floatingCartCount}>{totalCartItemCount} item{totalCartItemCount > 1 ? 's' : ''}</Text>
+            <Text style={styles.floatingCartTotal}>₹{cartSubtotal.toFixed(0)}</Text>
+          </View>
+          <Text style={styles.floatingCartCta}>View Bag ›</Text>
+        </TouchableOpacity>
+      )}
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
+  listContent: {
+    paddingHorizontal: spacing.base,
   },
-  scroll: {
-    flex: 1,
-    paddingHorizontal: 16,
+  gridRow: {
+    justifyContent: 'space-between',
   },
-  searchSection: {
-    marginTop: 14,
-    marginBottom: 14,
+  searchContainer: {
+    paddingVertical: spacing.md,
   },
-  searchBox: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
+  heroBanner: {
+    marginBottom: spacing.lg,
+  },
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F1219',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
   },
-  searchIcon: {
-    fontSize: 14,
-    marginRight: 8,
-  },
-  searchInput: {
+  heroContent: {
     flex: 1,
-    fontSize: 13,
-    color: '#0F1219',
-    fontWeight: '500',
   },
-  heroCardMargin: {
-    marginBottom: 20,
+  expressPill: {
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.full,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
   },
-  heroEyebrow: {
-    color: '#D4AF37',
+  expressPillText: {
+    ...typography.captionBold,
+    color: colors.goldSoft,
+    letterSpacing: 0.5,
     fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1.2,
-    marginBottom: 6,
   },
   heroTitle: {
-    color: '#FFFFFF',
+    ...typography.headline,
+    color: colors.textOnDark,
     fontSize: 22,
-    fontWeight: '900',
     lineHeight: 28,
-    marginBottom: 8,
   },
-  heroDesc: {
-    color: '#94A3B8',
-    fontSize: 12,
-    lineHeight: 18,
+  heroSub: {
+    ...typography.small,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
-  sectionHeader: {
+  catScroll: {
+    marginBottom: spacing.base,
+  },
+  // Cart badge in header
+  cartBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.md,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartIcon: {
+    fontSize: 18,
+  },
+  cartCount: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: colors.gold,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  cartCountText: {
+    color: colors.obsidian,
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  // Floating cart bar
+  floatingCart: {
+    position: 'absolute',
+    bottom: spacing.base,
+    left: spacing.base,
+    right: spacing.base,
+    backgroundColor: colors.obsidian,
+    borderRadius: radii.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
-    marginTop: 6,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#0F1219',
-    letterSpacing: -0.3,
-  },
-  seeAllText: {
-    color: '#B8860B',
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  itemCount: {
-    color: '#94A3B8',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  catScroll: {
-    marginBottom: 20,
-  },
-  catChip: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 20,
-    marginRight: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.borderGoldStrong,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  catChipActive: {
-    backgroundColor: '#0F1219',
-    borderColor: '#0F1219',
-  },
-  catChipText: {
-    color: '#475569',
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  catChipTextActive: {
-    color: '#F4E8C1',
-    fontWeight: '900',
-  },
-  spotlightSection: {
-    marginBottom: 20,
-  },
-  spotlightLabel: {
-    color: '#B8860B',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  spotlightRow: {
+  floatingCartLeft: {
     flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: spacing.sm,
   },
-  spotlightImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 14,
+  floatingCartCount: {
+    ...typography.smallBold,
+    color: colors.textMuted,
   },
-  spotlightInfo: {
-    flex: 1,
-  },
-  spotlightCat: {
-    color: '#B8860B',
-    fontSize: 9,
+  floatingCartTotal: {
+    ...typography.subtitle,
+    color: colors.goldSoft,
     fontWeight: '900',
-    textTransform: 'uppercase',
   },
-  spotlightTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#0F1219',
-    marginTop: 2,
-  },
-  spotlightPrice: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#0F1219',
-    marginTop: 4,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  floatingCartCta: {
+    ...typography.bodyBold,
+    color: colors.gold,
   },
 });
