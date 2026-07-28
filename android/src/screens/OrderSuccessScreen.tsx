@@ -4,10 +4,11 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { HeaderBar } from '../components/HeaderBar';
+import { DoppelCard } from '../components/DoppelCard';
+import { GoldButton } from '../components/GoldButton';
 
 export const OrderSuccessScreen: React.FC<any> = ({ route, navigation }) => {
   const { orderId } = route.params || {};
@@ -16,17 +17,22 @@ export const OrderSuccessScreen: React.FC<any> = ({ route, navigation }) => {
   const currentOrder = orders.find((o) => o.id === orderId) || orders[0];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title="Order Confirmed" showBack={false} />
+
       <ScrollView style={styles.scroll} contentContainerStyle={{ alignItems: 'center' }}>
-        <Text style={{ fontSize: 50, marginTop: 24, marginBottom: 12 }}>🎉</Text>
+        <Text style={{ fontSize: 54, marginTop: 20, marginBottom: 10 }}>🎉</Text>
         
-        <Text style={styles.successBadge}>ORDER CONFIRMED • SHAJAPUR EXPRESS</Text>
+        <View style={styles.badgePill}>
+          <Text style={styles.badgeText}>SHAJAPUR EXPRESS • ORDER CONFIRMED</Text>
+        </View>
+
         <Text style={styles.title}>Thank You for Shopping!</Text>
         <Text style={styles.subTitle}>Order ID: {currentOrder ? currentOrder.id : 'ORD-DC9824'}</Text>
 
-        {/* Live Stepper Card */}
-        <View style={styles.stepperCard}>
-          <Text style={styles.stepperHeader}>30-45 Mins Live Delivery Stepper</Text>
+        {/* Live Stepper Doppel Card */}
+        <DoppelCard variant="dark" style={styles.stepperMargin}>
+          <Text style={styles.stepperHeader}>⚡ 30-45 Mins Live Delivery Stepper</Text>
           
           <View style={styles.stepRow}>
             <View style={[styles.stepDot, styles.stepDotActive]} />
@@ -42,7 +48,7 @@ export const OrderSuccessScreen: React.FC<any> = ({ route, navigation }) => {
             <View style={[styles.stepDot, styles.stepDotActive]} />
             <View style={styles.stepInfo}>
               <Text style={styles.stepTitle}>Packaging & Quality Check</Text>
-              <Text style={styles.stepDesc}>Packing tumblers/stationery with gift ribbon</Text>
+              <Text style={styles.stepDesc}>Packing tumblers/stationery with luxury gift ribbon</Text>
             </View>
           </View>
 
@@ -55,19 +61,18 @@ export const OrderSuccessScreen: React.FC<any> = ({ route, navigation }) => {
               <Text style={styles.stepDesc}>Vikram Singh is heading to your Shajapur location</Text>
             </View>
           </View>
-        </View>
+        </DoppelCard>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          style={styles.homeBtn}
+        {/* Return Button */}
+        <GoldButton
+          title="Return to Store Catalog"
           onPress={() => navigation.navigate('Store')}
-        >
-          <Text style={styles.homeBtnText}>Return to Store Catalog</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
+          variant="gold"
+          size="lg"
+          style={{ width: '100%', marginBottom: 40 }}
+        />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -80,16 +85,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  successBadge: {
+  badgePill: {
     backgroundColor: '#D4AF37',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginBottom: 8,
+  },
+  badgeText: {
     color: '#0F1219',
     fontSize: 10,
     fontWeight: '900',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
     letterSpacing: 1,
-    marginBottom: 8,
   },
   title: {
     fontSize: 22,
@@ -98,18 +105,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   subTitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  stepperCard: {
+  stepperMargin: {
     width: '100%',
-    backgroundColor: '#0F1219',
-    borderRadius: 20,
-    padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.35)',
   },
   stepperHeader: {
     color: '#D4AF37',
@@ -150,20 +152,5 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontSize: 11,
     marginTop: 2,
-  },
-  homeBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 24,
-    width: '100%',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D4AF37',
-  },
-  homeBtnText: {
-    color: '#F4E8C1',
-    fontWeight: '900',
-    fontSize: 13,
   },
 });

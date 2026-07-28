@@ -5,9 +5,11 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { HeaderBar } from '../components/HeaderBar';
+import { DoppelCard } from '../components/DoppelCard';
+import { GoldButton } from '../components/GoldButton';
 
 export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
   const { selectedAddress, placeOrder, totalAmountToPay } = useApp();
@@ -21,24 +23,22 @@ export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Checkout & Payment</Text>
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title="Express Checkout" showBack={true} />
 
-      <ScrollView style={styles.scroll}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         
         {/* Address Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Delivery Address (Shajapur)</Text>
+        <DoppelCard variant="light" style={styles.cardMargin}>
+          <Text style={styles.cardTitle}>📍 Delivery Address (Shajapur)</Text>
           <Text style={styles.addressName}>{selectedAddress.name} ({selectedAddress.label})</Text>
           <Text style={styles.addressStreet}>{selectedAddress.street}, {selectedAddress.city}</Text>
           <Text style={styles.addressPhone}>Phone: {selectedAddress.phone}</Text>
-        </View>
+        </DoppelCard>
 
         {/* Slot Selector */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Select Delivery Slot</Text>
+        <DoppelCard variant="light" style={styles.cardMargin}>
+          <Text style={styles.cardTitle}>⏱️ Select Delivery Slot</Text>
           {['30-45 Mins Express Delivery', 'Standard Evening Slot (6 PM - 8 PM)', 'Tomorrow Morning (9 AM - 11 AM)'].map((slot) => {
             const isSelected = selectedSlot === slot;
             return (
@@ -51,11 +51,11 @@ export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </DoppelCard>
 
         {/* Delivery Partner Tip */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Delivery Driver Tip (Shajapur Partner)</Text>
+        <DoppelCard variant="light" style={styles.cardMargin}>
+          <Text style={styles.cardTitle}>🤝 Delivery Driver Tip (Shajapur Partner)</Text>
           <View style={styles.tipRow}>
             {[0, 20, 30, 50].map((amount) => {
               const isSelected = tip === amount;
@@ -72,11 +72,11 @@ export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
               );
             })}
           </View>
-        </View>
+        </DoppelCard>
 
         {/* Payment Method */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Payment Method</Text>
+        <DoppelCard variant="dark" style={styles.cardMargin}>
+          <Text style={styles.darkCardTitle}>💳 Select Payment Method</Text>
           {[
             'Instant UPI (PhonePe / GPay / Paytm)',
             'Cash on Delivery (COD Shajapur)',
@@ -86,28 +86,25 @@ export const CheckoutScreen: React.FC<any> = ({ navigation }) => {
             return (
               <TouchableOpacity
                 key={pm}
-                style={[styles.slotOption, isSelected && styles.slotOptionActive]}
+                style={[styles.darkSlotOption, isSelected && styles.darkSlotOptionActive]}
                 onPress={() => setPaymentMethod(pm)}
               >
-                <Text style={[styles.slotText, isSelected && styles.slotTextActive]}>{pm}</Text>
+                <Text style={[styles.darkSlotText, isSelected && styles.darkSlotTextActive]}>{pm}</Text>
               </TouchableOpacity>
             );
           })}
-        </View>
+        </DoppelCard>
 
         {/* Place Order CTA */}
-        <TouchableOpacity
-          style={styles.placeOrderBtn}
+        <GoldButton
+          title={`Confirm & Pay ₹${(totalAmountToPay + tip).toFixed(0)} →`}
           onPress={handlePlaceOrder}
-        >
-          <Text style={styles.placeOrderBtnText}>
-            Confirm & Pay ₹{(totalAmountToPay + tip).toFixed(0)} →
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
+          variant="gold"
+          size="lg"
+          style={{ marginBottom: 40 }}
+        />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -116,32 +113,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  header: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 16,
-  },
   scroll: {
     flex: 1,
     padding: 16,
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  cardMargin: {
+    marginBottom: 14,
   },
   cardTitle: {
     fontWeight: '900',
     fontSize: 14,
     color: '#0F1219',
+    marginBottom: 10,
+  },
+  darkCardTitle: {
+    fontWeight: '900',
+    fontSize: 14,
+    color: '#F4E8C1',
     marginBottom: 10,
   },
   addressName: {
@@ -162,7 +150,7 @@ const styles = StyleSheet.create({
   slotOption: {
     backgroundColor: '#F8FAFC',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -178,7 +166,28 @@ const styles = StyleSheet.create({
   },
   slotTextActive: {
     color: '#F4E8C1',
-    fontWeight: 'bold',
+    fontWeight: '900',
+  },
+  darkSlotOption: {
+    backgroundColor: '#1E2330',
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  darkSlotOptionActive: {
+    backgroundColor: '#D4AF37',
+    borderColor: '#D4AF37',
+  },
+  darkSlotText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  darkSlotTextActive: {
+    color: '#0F1219',
+    fontWeight: '900',
   },
   tipRow: {
     flexDirection: 'row',
@@ -188,14 +197,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F1F5F9',
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   tipChipActive: {
-    backgroundColor: '#D4AF37',
-    borderColor: '#D4AF37',
+    backgroundColor: '#0F1219',
+    borderColor: '#0F1219',
   },
   tipText: {
     fontSize: 12,
@@ -203,18 +212,7 @@ const styles = StyleSheet.create({
     color: '#0F1219',
   },
   tipTextActive: {
-    color: '#0F1219',
-  },
-  placeOrderBtn: {
-    backgroundColor: '#D4AF37',
-    paddingVertical: 16,
-    borderRadius: 24,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  placeOrderBtnText: {
-    color: '#0F1219',
+    color: '#F4E8C1',
     fontWeight: '900',
-    fontSize: 15,
   },
 });

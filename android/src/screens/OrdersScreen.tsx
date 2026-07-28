@@ -4,25 +4,26 @@ import {
   Text,
   View,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { HeaderBar } from '../components/HeaderBar';
+import { DoppelCard } from '../components/DoppelCard';
 
-export const OrdersScreen: React.FC<any> = () => {
+export const OrdersScreen: React.FC<any> = ({ navigation }) => {
   const { orders } = useApp();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Digital Order History ({orders.length})</Text>
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title="Order Receipts" showBack={true} />
 
-      <ScrollView style={styles.scroll}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {orders.map((o) => (
-          <View key={o.id} style={styles.orderCard}>
+          <DoppelCard key={o.id} variant="light" style={styles.orderMargin}>
             <View style={styles.orderHeader}>
               <Text style={styles.orderId}>{o.id}</Text>
-              <Text style={styles.statusBadge}>{o.status.toUpperCase()}</Text>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusBadgeText}>{o.status.toUpperCase()}</Text>
+              </View>
             </View>
 
             <Text style={styles.date}>{new Date(o.createdAt).toLocaleDateString()}</Text>
@@ -39,12 +40,12 @@ export const OrdersScreen: React.FC<any> = () => {
               <Text style={styles.slot}>{o.deliverySlot}</Text>
               <Text style={styles.total}>Paid ₹{o.totalPaid.toFixed(0)}</Text>
             </View>
-          </View>
+          </DoppelCard>
         ))}
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -53,27 +54,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  header: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 16,
-  },
   scroll: {
     flex: 1,
     padding: 16,
   },
-  orderCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
+  orderMargin: {
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   orderHeader: {
     flexDirection: 'row',
@@ -87,12 +73,14 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     backgroundColor: '#D4AF37',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  statusBadgeText: {
     color: '#0F1219',
     fontWeight: '900',
-    fontSize: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    fontSize: 9,
   },
   date: {
     fontSize: 11,

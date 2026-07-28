@@ -5,16 +5,14 @@ import {
   View,
   ScrollView,
   TextInput,
-  Image,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
-import { useApp } from '../context/AppContext';
 import { PRODUCTS } from '../data/mockData';
+import { HeaderBar } from '../components/HeaderBar';
+import { ProductCard } from '../components/ProductCard';
 
-export const SearchScreen: React.FC<any> = ({ route }) => {
+export const SearchScreen: React.FC<any> = ({ route, navigation }) => {
   const { q } = route.params || {};
-  const { addToCart } = useApp();
   const [query, setQuery] = useState(q || '');
 
   const searchResults = PRODUCTS.filter(
@@ -25,21 +23,27 @@ export const SearchScreen: React.FC<any> = ({ route }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TextInput
-          placeholder="Search Tumblers, Journals, Books, Gifts..."
-          placeholderTextColor="#94A3B8"
-          style={styles.searchInput}
-          value={query}
-          onChangeText={setQuery}
-          autoFocus={!q}
-        />
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title="Store Search" />
+
+      {/* Input Row */}
+      <View style={styles.searchBarSection}>
+        <View style={styles.searchBox}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            placeholder="Search Tumblers, Journals, Books, Gifts..."
+            placeholderTextColor="#94A3B8"
+            style={styles.searchInput}
+            value={query}
+            onChangeText={setQuery}
+            autoFocus={!q}
+          />
+        </View>
       </View>
 
-      <ScrollView style={styles.scroll}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.resultsCount}>
-          {query.trim() ? `Showing ${searchResults.length} results for "${query}"` : 'Trending Search Tags'}
+          {query.trim() ? `Showing ${searchResults.length} results for "${query}"` : '🔥 Trending Search Tags'}
         </Text>
 
         {!query.trim() && (
@@ -58,28 +62,13 @@ export const SearchScreen: React.FC<any> = ({ route }) => {
 
         <View style={styles.grid}>
           {searchResults.map((p) => (
-            <View key={p.id} style={styles.productCard}>
-              <Image source={{ uri: p.image }} style={styles.productImage} />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                <Text style={styles.productCategory}>{p.categoryName}</Text>
-                <View style={styles.priceRow}>
-                  <Text style={styles.price}>₹{p.price.toFixed(0)}</Text>
-                  <TouchableOpacity
-                    style={styles.addBtn}
-                    onPress={() => addToCart(p)}
-                  >
-                    <Text style={styles.addBtnText}>+ Add</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+            <ProductCard key={p.id} product={p} />
           ))}
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -88,18 +77,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  header: {
+  searchBarSection: {
     backgroundColor: '#0F1219',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 12,
   },
-  searchInput: {
+  searchBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  searchIcon: {
+    fontSize: 14,
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
     fontSize: 13,
     color: '#0F1219',
+    fontWeight: '500',
   },
   scroll: {
     flex: 1,
@@ -134,52 +133,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-  },
-  productCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  productImage: {
-    width: '100%',
-    height: 120,
-  },
-  productInfo: {
-    padding: 10,
-  },
-  productName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
-  },
-  productCategory: {
-    color: '#94A3B8',
-    fontSize: 10,
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  price: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-  },
-  addBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  addBtnText: {
-    color: '#F4E8C1',
-    fontWeight: 'bold',
-    fontSize: 11,
   },
 });

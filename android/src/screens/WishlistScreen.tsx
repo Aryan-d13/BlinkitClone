@@ -4,66 +4,52 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { PRODUCTS } from '../data/mockData';
+import { HeaderBar } from '../components/HeaderBar';
+import { ProductCard } from '../components/ProductCard';
+import { GoldButton } from '../components/GoldButton';
 
-export const WishlistScreen: React.FC<any> = () => {
-  const { wishlist, toggleWishlist, addToCart } = useApp();
+export const WishlistScreen: React.FC<any> = ({ navigation }) => {
+  const { wishlist } = useApp();
 
   const favProducts = PRODUCTS.filter((p) => wishlist.includes(p.id));
 
   if (favProducts.length === 0) {
     return (
-      <SafeAreaView style={styles.emptyContainer}>
-        <Text style={{ fontSize: 40, marginBottom: 12 }}>🤍</Text>
-        <Text style={styles.emptyTitle}>No Favorites Saved Yet</Text>
-        <Text style={styles.emptyDesc}>Tap the heart icon on any tumbler, journal, or book to save for later.</Text>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <HeaderBar navigation={navigation} title="Saved Favorites" />
+        <View style={styles.emptyContainer}>
+          <Text style={{ fontSize: 44, marginBottom: 12 }}>🤍</Text>
+          <Text style={styles.emptyTitle}>No Favorites Saved Yet</Text>
+          <Text style={styles.emptyDesc}>Tap the heart icon on any tumbler, journal, book, or gift hamper to save for later.</Text>
+          <GoldButton
+            title="Explore Store Catalog"
+            onPress={() => navigation.navigate('Products')}
+            variant="gold"
+            size="md"
+            style={{ marginTop: 16 }}
+          />
+        </View>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Saved Favorites ({favProducts.length})</Text>
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title={`Saved Favorites (${favProducts.length})`} />
 
-      <ScrollView style={styles.scroll}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.grid}>
           {favProducts.map((p) => (
-            <View key={p.id} style={styles.productCard}>
-              <Image source={{ uri: p.image }} style={styles.productImage} />
-              <TouchableOpacity
-                style={styles.favIcon}
-                onPress={() => toggleWishlist(p.id)}
-              >
-                <Text style={{ fontSize: 12 }}>❤️</Text>
-              </TouchableOpacity>
-
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                <Text style={styles.productCategory}>{p.categoryName}</Text>
-                <View style={styles.priceRow}>
-                  <Text style={styles.price}>₹{p.price.toFixed(0)}</Text>
-                  <TouchableOpacity
-                    style={styles.addBtn}
-                    onPress={() => addToCart(p)}
-                  >
-                    <Text style={styles.addBtnText}>+ Add</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+            <ProductCard key={p.id} product={p} />
           ))}
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -74,7 +60,6 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
@@ -89,16 +74,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     textAlign: 'center',
-  },
-  header: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 16,
+    lineHeight: 18,
   },
   scroll: {
     flex: 1,
@@ -108,60 +84,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-  },
-  productCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  productImage: {
-    width: '100%',
-    height: 120,
-  },
-  favIcon: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 4,
-  },
-  productInfo: {
-    padding: 10,
-  },
-  productName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
-  },
-  productCategory: {
-    color: '#94A3B8',
-    fontSize: 10,
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  price: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-  },
-  addBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  addBtnText: {
-    color: '#F4E8C1',
-    fontWeight: 'bold',
-    fontSize: 11,
   },
 });

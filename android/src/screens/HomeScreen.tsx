@@ -7,15 +7,16 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES, PRODUCTS } from '../data/mockData';
-import { SITE_CONTENT } from '../config/siteContent';
+import { HeaderBar } from '../components/HeaderBar';
+import { DoppelCard } from '../components/DoppelCard';
+import { GoldButton } from '../components/GoldButton';
+import { ProductCard } from '../components/ProductCard';
 
 export const HomeScreen: React.FC<any> = ({ navigation }) => {
-  const { cart, addToCart, wishlist, toggleWishlist, totalCartItemCount, cartSubtotal } = useApp();
   const [selectedCat, setSelectedCat] = useState('cat_all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -24,79 +25,67 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
     return p.categoryId === selectedCat;
   });
 
+  const spotlightProduct = PRODUCTS[0];
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F1219" />
       
-      {/* Top Header Bar */}
-      <View style={styles.topHeader}>
-        <View style={styles.brandRow}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoText}>DC</Text>
-          </View>
-          <View>
-            <Text style={styles.brandTitle}>DC <Text style={{ color: '#D4AF37' }}>STORES</Text></Text>
-            <Text style={styles.subtext}>Anuradha Mehta Enterprises</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.cartButton}
-          onPress={() => navigation.navigate('Cart')}
-        >
-          <Text style={styles.cartButtonText}>
-            Bag {totalCartItemCount > 0 ? `(${totalCartItemCount})` : ''}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Shajapur Delivery Pill */}
-      <View style={styles.deliveryBar}>
-        <Text style={styles.deliveryText}>
-          ⚡ <Text style={{ color: '#F4E8C1', fontWeight: 'bold' }}>Shajapur Express</Text> • 30-45 Mins Delivery
-        </Text>
-      </View>
+      {/* Native Header Bar */}
+      <HeaderBar navigation={navigation} />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            placeholder="Search Tumblers, Journals, Books, Gifts..."
-            placeholderTextColor="#94A3B8"
-            style={styles.searchInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={() => navigation.navigate('Search', { q: searchQuery })}
-          />
+        {/* Search Input Box */}
+        <View style={styles.searchSection}>
+          <View style={styles.searchBox}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              placeholder="Search Tumblers, Journals, Books, Gifts..."
+              placeholderTextColor="#94A3B8"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={() => navigation.navigate('Search', { q: searchQuery })}
+            />
+          </View>
         </View>
 
-        {/* Hero Card */}
-        <View style={styles.heroCard}>
-          <Text style={styles.heroEyebrow}>DC STORES • SHAJAPUR, MP</Text>
-          <Text style={styles.heroTitle}>Aesthetic Tumblers, Books & Custom Gifts</Text>
+        {/* Hero Doppel Card */}
+        <DoppelCard variant="dark" style={styles.heroCardMargin}>
+          <Text style={styles.heroEyebrow}>✨ DC STORES • SHAJAPUR, MP</Text>
+          <Text style={styles.heroTitle}>
+            Aesthetic Tumblers, Journals, Books & Gifts
+          </Text>
           <Text style={styles.heroDesc}>
-            Shop high-grade insulated tumblers, bullet journals, viral books, and luxury gift hampers with express local delivery.
+            Shop high-grade stainless tumblers, leather journals, viral books, and luxury gift hampers with 30-45 mins express local delivery in Shajapur.
           </Text>
 
-          <TouchableOpacity
-            style={styles.heroBtn}
+          <GoldButton
+            title="Browse Full Store Catalog →"
             onPress={() => navigation.navigate('Products')}
-          >
-            <Text style={styles.heroBtnText}>Browse Store Catalog →</Text>
-          </TouchableOpacity>
-        </View>
+            variant="gold"
+            size="md"
+            style={{ marginTop: 12, alignSelf: 'flex-start' }}
+          />
+        </DoppelCard>
 
-        {/* Departments Scroll */}
+        {/* Horizontal Category Carousel */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Explore Departments</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={styles.seeAllText}>See All →</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.catScroll}
+          contentContainerStyle={{ paddingRight: 16 }}
+        >
           <TouchableOpacity
+            activeOpacity={0.8}
             style={[styles.catChip, selectedCat === 'cat_all' && styles.catChipActive]}
             onPress={() => setSelectedCat('cat_all')}
           >
@@ -109,6 +98,7 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
             return (
               <TouchableOpacity
                 key={cat.id}
+                activeOpacity={0.8}
                 style={[styles.catChip, isActive && styles.catChipActive]}
                 onPress={() => setSelectedCat(cat.id)}
               >
@@ -120,47 +110,49 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
           })}
         </ScrollView>
 
-        {/* Products Grid */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular Products</Text>
-          <Text style={styles.itemCount}>{filteredProducts.length} items</Text>
-        </View>
-
-        <View style={styles.productGrid}>
-          {filteredProducts.map((p) => {
-            const isFav = wishlist.includes(p.id);
-            return (
-              <View key={p.id} style={styles.productCard}>
-                <Image source={{ uri: p.image }} style={styles.productImage} />
-                <TouchableOpacity
-                  style={styles.favIcon}
-                  onPress={() => toggleWishlist(p.id)}
-                >
-                  <Text style={{ fontSize: 12 }}>{isFav ? '❤️' : '🤍'}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                  <Text style={styles.productCategory}>{p.categoryName}</Text>
-                  
-                  <View style={styles.priceRow}>
-                    <Text style={styles.price}>₹{p.price.toFixed(0)}</Text>
-                    <TouchableOpacity
-                      style={styles.addBtn}
-                      onPress={() => addToCart(p)}
-                    >
-                      <Text style={styles.addBtnText}>+ Add</Text>
-                    </TouchableOpacity>
-                  </View>
+        {/* Spotlight Card */}
+        {selectedCat === 'cat_all' && (
+          <View style={styles.spotlightSection}>
+            <Text style={styles.spotlightLabel}>🌟 SPOTLIGHT RECOMMENDED</Text>
+            <DoppelCard variant="light">
+              <View style={styles.spotlightRow}>
+                <Image source={{ uri: spotlightProduct.image }} style={styles.spotlightImage} />
+                <View style={styles.spotlightInfo}>
+                  <Text style={styles.spotlightCat}>{spotlightProduct.categoryName}</Text>
+                  <Text style={styles.spotlightTitle}>{spotlightProduct.name}</Text>
+                  <Text style={styles.spotlightPrice}>₹{spotlightProduct.price.toFixed(0)}</Text>
+                  <GoldButton
+                    title="+ Add to Bag"
+                    onPress={() => navigation.navigate('Products')}
+                    variant="dark"
+                    size="sm"
+                    style={{ marginTop: 8 }}
+                  />
                 </View>
               </View>
-            );
-          })}
+            </DoppelCard>
+          </View>
+        )}
+
+        {/* Popular Product Grid */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Popular Products</Text>
+          <Text style={styles.itemCount}>({filteredProducts.length} items)</Text>
+        </View>
+
+        <View style={styles.grid}>
+          {filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onPress={() => navigation.navigate('Products', { catId: product.categoryId })}
+            />
+          ))}
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -169,149 +161,91 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  topHeader: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(212, 175, 55, 0.3)',
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  logoBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#D4AF37',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoText: {
-    fontWeight: '900',
-    color: '#0F1219',
-    fontSize: 16,
-  },
-  brandTitle: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 16,
-  },
-  subtext: {
-    color: '#D4AF37',
-    fontSize: 9,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  cartButton: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  cartButtonText: {
-    color: '#0F1219',
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  deliveryBar: {
-    backgroundColor: '#1E2330',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-  },
-  deliveryText: {
-    color: '#94A3B8',
-    fontSize: 11,
-  },
   scroll: {
     flex: 1,
-    padding: 16,
-  },
-  searchContainer: {
-    marginBottom: 16,
-  },
-  searchInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
     paddingHorizontal: 16,
+  },
+  searchSection: {
+    marginTop: 14,
+    marginBottom: 14,
+  },
+  searchBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13,
-    color: '#0F1219',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    shadowColor: '#0F1219',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  heroCard: {
-    backgroundColor: '#0F1219',
-    borderRadius: 20,
-    padding: 20,
+  searchIcon: {
+    fontSize: 14,
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0F1219',
+    fontWeight: '500',
+  },
+  heroCardMargin: {
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.35)',
   },
   heroEyebrow: {
     color: '#D4AF37',
     fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: 1,
+    fontWeight: '900',
+    letterSpacing: 1.2,
     marginBottom: 6,
   },
   heroTitle: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '900',
+    lineHeight: 28,
     marginBottom: 8,
   },
   heroDesc: {
     color: '#94A3B8',
     fontSize: 12,
     lineHeight: 18,
-    marginBottom: 14,
-  },
-  heroBtn: {
-    backgroundColor: '#D4AF37',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  heroBtnText: {
-    color: '#0F1219',
-    fontWeight: '800',
-    fontSize: 12,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
-    marginTop: 8,
+    marginTop: 6,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '900',
     color: '#0F1219',
+    letterSpacing: -0.3,
   },
-  seeAll: {
+  seeAllText: {
     color: '#B8860B',
-    fontWeight: 'bold',
+    fontWeight: '800',
     fontSize: 12,
   },
   itemCount: {
     color: '#94A3B8',
     fontSize: 12,
+    fontWeight: 'bold',
   },
   catScroll: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   catChip: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 20,
     marginRight: 8,
     borderWidth: 1,
@@ -327,66 +261,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   catChipTextActive: {
-    color: '#FFFFFF',
+    color: '#F4E8C1',
+    fontWeight: '900',
   },
-  productGrid: {
+  spotlightSection: {
+    marginBottom: 20,
+  },
+  spotlightLabel: {
+    color: '#B8860B',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  spotlightRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  spotlightImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 14,
+  },
+  spotlightInfo: {
+    flex: 1,
+  },
+  spotlightCat: {
+    color: '#B8860B',
+    fontSize: 9,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  spotlightTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#0F1219',
+    marginTop: 2,
+  },
+  spotlightPrice: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#0F1219',
+    marginTop: 4,
+  },
+  grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-  },
-  productCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  productImage: {
-    width: '100%',
-    height: 120,
-  },
-  favIcon: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 4,
-  },
-  productInfo: {
-    padding: 10,
-  },
-  productName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
-  },
-  productCategory: {
-    color: '#94A3B8',
-    fontSize: 10,
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  price: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-  },
-  addBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  addBtnText: {
-    color: '#F4E8C1',
-    fontWeight: 'bold',
-    fontSize: 11,
   },
 });

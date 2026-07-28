@@ -4,16 +4,15 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
-import { useApp } from '../context/AppContext';
 import { PRODUCTS, CATEGORIES } from '../data/mockData';
+import { HeaderBar } from '../components/HeaderBar';
+import { DoppelCard } from '../components/DoppelCard';
+import { ProductCard } from '../components/ProductCard';
 
-export const ProductsScreen: React.FC<any> = ({ route }) => {
+export const ProductsScreen: React.FC<any> = ({ route, navigation }) => {
   const { catId } = route.params || {};
-  const { addToCart, wishlist, toggleWishlist } = useApp();
   const [selectedCat, setSelectedCat] = useState(catId || 'all');
 
   const filteredProducts = PRODUCTS.filter((p) => {
@@ -22,11 +21,10 @@ export const ProductsScreen: React.FC<any> = ({ route }) => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Full Store Catalog</Text>
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} title="Store Catalog" showBack={true} />
 
+      {/* Department Filter Bar */}
       <View style={styles.catBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
@@ -55,42 +53,22 @@ export const ProductsScreen: React.FC<any> = ({ route }) => {
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.scroll}>
-        <View style={styles.productGrid}>
-          {filteredProducts.map((p) => {
-            const isFav = wishlist.includes(p.id);
-            return (
-              <View key={p.id} style={styles.productCard}>
-                <Image source={{ uri: p.image }} style={styles.productImage} />
-                <TouchableOpacity
-                  style={styles.favIcon}
-                  onPress={() => toggleWishlist(p.id)}
-                >
-                  <Text style={{ fontSize: 12 }}>{isFav ? '❤️' : '🤍'}</Text>
-                </TouchableOpacity>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <DoppelCard variant="gold" style={styles.headerCard}>
+          <Text style={styles.cardTag}>DC STORES • SHAJAPUR CATALOG</Text>
+          <Text style={styles.cardTitle}>Browse Aesthetic Retail Collection</Text>
+          <Text style={styles.cardSub}>Showing {filteredProducts.length} items available for 30-45 Mins Express Delivery.</Text>
+        </DoppelCard>
 
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                  <Text style={styles.productCategory}>{p.categoryName}</Text>
-                  
-                  <View style={styles.priceRow}>
-                    <Text style={styles.price}>₹{p.price.toFixed(0)}</Text>
-                    <TouchableOpacity
-                      style={styles.addBtn}
-                      onPress={() => addToCart(p)}
-                    >
-                      <Text style={styles.addBtnText}>+ Add</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            );
-          })}
+        <View style={styles.productGrid}>
+          {filteredProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -98,16 +76,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
-  },
-  header: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 16,
   },
   catBar: {
     backgroundColor: '#FFFFFF',
@@ -119,7 +87,7 @@ const styles = StyleSheet.create({
   catChip: {
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
     marginRight: 8,
   },
@@ -133,69 +101,35 @@ const styles = StyleSheet.create({
   },
   catChipTextActive: {
     color: '#F4E8C1',
+    fontWeight: '900',
   },
   scroll: {
     flex: 1,
     padding: 16,
   },
+  headerCard: {
+    marginBottom: 16,
+  },
+  cardTag: {
+    color: '#B8860B',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F1219',
+  },
+  cardSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 4,
+  },
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-  },
-  productCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  productImage: {
-    width: '100%',
-    height: 120,
-  },
-  favIcon: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 4,
-  },
-  productInfo: {
-    padding: 10,
-  },
-  productName: {
-    fontWeight: 'bold',
-    fontSize: 13,
-    color: '#0F1219',
-  },
-  productCategory: {
-    color: '#94A3B8',
-    fontSize: 10,
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  price: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: '#0F1219',
-  },
-  addBtn: {
-    backgroundColor: '#0F1219',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  addBtnText: {
-    color: '#F4E8C1',
-    fontWeight: 'bold',
-    fontSize: 11,
   },
 });
