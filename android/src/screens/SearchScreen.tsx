@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { SearchBar } from '../components/SearchBar';
 import { ProductCard } from '../components/ProductCard';
@@ -8,6 +8,7 @@ import { EmptyState } from '../components/EmptyState';
 import { PRODUCTS } from '../data/mockData';
 import { colors, spacing, typography, radii, minTouchTarget } from '../theme/tokens';
 
+const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? Math.max(StatusBar.currentHeight || 0, 36) : 0;
 const TRENDING_TAGS = ['Insulated Tumbler', 'Leather Journal', 'Atomic Habits', 'Soy Candle', 'Gift Hamper', 'Highlighters'];
 
 export const SearchScreen: React.FC<any> = ({ route, navigation }) => {
@@ -27,7 +28,7 @@ export const SearchScreen: React.FC<any> = ({ route, navigation }) => {
 
   return (
     <ScreenWrapper>
-      {/* Search header */}
+      {/* Search header with status bar inset */}
       <View style={styles.headerBar}>
         <SearchBar
           value={query}
@@ -51,7 +52,7 @@ export const SearchScreen: React.FC<any> = ({ route, navigation }) => {
                 {results.length} result{results.length !== 1 ? 's' : ''} for "{query}"
               </Text>
             }
-          renderItem={({ item }) => (
+            renderItem={({ item }) => (
               <ProductCard product={item} />
             )}
           />
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.obsidian,
     paddingHorizontal: spacing.base,
     paddingBottom: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: STATUS_BAR_HEIGHT + spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderGold,
   },

@@ -50,7 +50,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
       <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.image} />
 
-        {/* Wishlist */}
+        {/* Discount Badge on Top-Left of Image */}
+        {hasDiscount && (
+          <View style={styles.discountTag}>
+            <Text style={styles.discountTagText}>{discountPct}% OFF</Text>
+          </View>
+        )}
+
+        {/* Wishlist Heart on Top-Right of Image */}
         <TouchableOpacity
           style={[styles.favBtn, isFav && styles.favBtnActive]}
           onPress={() => toggleWishlist(product.id)}
@@ -59,7 +66,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           <Text style={styles.favIcon}>{isFav ? '♥' : '♡'}</Text>
         </TouchableOpacity>
 
-        {/* Rating */}
+        {/* Rating Badge on Bottom-Left of Image */}
         <View style={styles.ratingPill}>
           <Text style={styles.ratingStar}>★</Text>
           <Text style={styles.ratingValue}>{product.rating}</Text>
@@ -80,10 +87,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           <View style={styles.priceCol}>
             <Text style={styles.priceText}>₹{product.price.toFixed(0)}</Text>
             {hasDiscount && (
-              <View style={styles.discountRow}>
-                <Text style={styles.originalPriceText}>₹{product.originalPrice!.toFixed(0)}</Text>
-                <Text style={styles.discountBadge}>{discountPct}% off</Text>
-              </View>
+              <Text style={styles.originalPriceText}>₹{product.originalPrice!.toFixed(0)}</Text>
             )}
           </View>
 
@@ -124,11 +128,30 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 135,
     backgroundColor: colors.surfaceMuted,
+    position: 'relative',
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+  },
+  discountTag: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    backgroundColor: colors.obsidian,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 3,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.borderGoldStrong,
+    zIndex: 2,
+  },
+  discountTagText: {
+    color: colors.goldSoft,
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
   favBtn: {
     position: 'absolute',
@@ -140,6 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.92)',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
     ...shadows.low,
   },
   favBtnActive: {
@@ -156,10 +180,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: 'rgba(15, 18, 25, 0.8)',
+    backgroundColor: 'rgba(15, 18, 25, 0.85)',
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: radii.sm,
+    zIndex: 2,
   },
   ratingStar: {
     color: colors.warning,
@@ -205,25 +230,15 @@ const styles = StyleSheet.create({
   priceText: {
     color: colors.textPrimary,
     fontWeight: '900',
-    fontSize: 14,
+    fontSize: 15,
     fontVariant: ['tabular-nums'],
-  },
-  discountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    marginTop: 1,
   },
   originalPriceText: {
     color: colors.textMuted,
-    fontSize: 10,
+    fontSize: 10.5,
     textDecorationLine: 'line-through',
     fontVariant: ['tabular-nums'],
-  },
-  discountBadge: {
-    color: colors.goldDeep,
-    fontSize: 8.5,
-    fontWeight: '800',
+    marginTop: 1,
   },
   addBtn: {
     backgroundColor: colors.obsidian,

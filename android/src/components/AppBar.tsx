@@ -9,7 +9,7 @@ interface AppBarProps {
   subtitle?: string;
 }
 
-const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0;
+const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? Math.max(StatusBar.currentHeight || 0, 36) : 0;
 
 export const AppBar: React.FC<AppBarProps> = ({
   title,
@@ -65,7 +65,7 @@ export const AppBar: React.FC<AppBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.obsidian,
-    paddingTop: STATUS_BAR_HEIGHT + spacing.xs,
+    paddingTop: STATUS_BAR_HEIGHT + spacing.sm,
     paddingBottom: spacing.md,
     paddingHorizontal: spacing.base,
     borderBottomWidth: 1,
